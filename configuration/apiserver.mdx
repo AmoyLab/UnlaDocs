@@ -202,8 +202,8 @@ notifier:
 
 ```yaml
 super_admin:
-  username: "${SUPER_ADMIN_USERNAME:admin}"     # 超级管理员用户名
-  password: "${SUPER_ADMIN_PASSWORD:admin}"     # 超级管理员密码（生产环境请修改）
+  username: "${SUPER_ADMIN_USERNAME:admin}"                                     # 超级管理员用户名
+  password: "${SUPER_ADMIN_PASSWORD:changeme-please-use-a-secure-password}"     # 超级管理员密码（生产环境请修改）
 ```
 
 <Warning>
@@ -216,8 +216,8 @@ JWT 配置用于设置 web 认证相关的参数：
 
 ```yaml
 jwt:
-  secret_key: "${APISERVER_JWT_SECRET_KEY:Pls-Change-Me!}"  # JWT密钥（生产环境请修改）
-  duration: "${APISERVER_JWT_DURATION:24h}"                # Token有效期
+  secret_key: "${APISERVER_JWT_SECRET_KEY:changeme-please-generate-a-random-secret}"  # JWT密钥（生产环境请修改）
+  duration: "${APISERVER_JWT_DURATION:24h}"                                           # Token有效期
 ```
 
 <Warning>

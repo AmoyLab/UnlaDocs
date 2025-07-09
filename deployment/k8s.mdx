@@ -3,11 +3,7 @@ title: "Kubernetes 部署"
 description: "在 Kubernetes 集群中部署 MCP Gateway"
 ---
 
-<Warning>
-**文档补充中...**
 
-Kubernetes 部署文档正在完善中。如果您想帮忙完善这部分内容，欢迎向项目贡献！
-</Warning>
 
 ## 部署概述
 
@@ -51,191 +47,63 @@ graph TB
 
 ## 快速开始
 
-### 前置要求
-
-- Kubernetes 集群 (v1.20+)
-- kubectl 命令行工具
-- Helm (可选，推荐)
-
 ### 使用 kubectl 部署
 
 <Steps>
+  <Step title="下载部署文件">
+    从 GitHub 下载所有 K8s 相关的部署文件：
+    ```bash
+    # 克隆项目或下载部署文件目录
+    git clone https://github.com/AmoyLab/Unla.git
+    cd Unla/deploy/k8s/multi
+    ```
+  </Step>
+
   <Step title="创建命名空间">
     ```bash
-    kubectl create namespace mcp-gateway
+    kubectl apply -f .
     ```
   </Step>
 
-  <Step title="部署数据库">
+  <Step title="部署依赖服务">
     ```bash
-    # PostgreSQL
-    kubectl apply -f https://raw.githubusercontent.com/amoylab/unla/main/deploy/k8s/postgres.yaml -n mcp-gateway
-
-    # Redis
-    kubectl apply -f https://raw.githubusercontent.com/amoylab/unla/main/deploy/k8s/redis.yaml -n mcp-gateway
+    # 部署数据库等依赖服务
+    kubectl apply -f deps
     ```
   </Step>
 
-  <Step title="配置 ConfigMap 和 Secret">
+  <Step title="部署应用基础服务">
     ```bash
-    kubectl apply -f https://raw.githubusercontent.com/amoylab/unla/main/deploy/k8s/configmap.yaml -n mcp-gateway
-    kubectl apply -f https://raw.githubusercontent.com/amoylab/unla/main/deploy/k8s/secret.yaml -n mcp-gateway
+    # 部署核心应用服务
+    kubectl apply -f base
     ```
   </Step>
 
-  <Step title="部署应用服务">
+  <Step title="部署网关服务 (二选一)">
+    根据您的环境选择合适的网关：
+
+    **使用 Traefik:**
     ```bash
-    kubectl apply -f https://raw.githubusercontent.com/amoylab/unla/main/deploy/k8s/mcp-gateway.yaml -n mcp-gateway
-    kubectl apply -f https://raw.githubusercontent.com/amoylab/unla/main/deploy/k8s/apiserver.yaml -n mcp-gateway
-    kubectl apply -f https://raw.githubusercontent.com/amoylab/unla/main/deploy/k8s/web.yaml -n mcp-gateway
+    kubectl apply -f traefik
+    ```
+
+    **或使用 Nginx Ingress:**
+    ```bash
+    kubectl apply -f ingress
     ```
   </Step>
 </Steps>
 
-### 使用 Helm 部署
-
-<Steps>
-  <Step title="添加 Helm 仓库">
-    ```bash
-    helm repo add unla https://amoylab.github.io/unla-helm-charts
-    helm repo update
-    ```
-  </Step>
-
-  <Step title="自定义配置">
-    创建 `values.yaml` 文件：
-    ```yaml
-    global:
-      storageClass: "fast-ssd"
-
-    postgresql:
-      enabled: true
-      auth:
-        postgresPassword: "your-postgres-password"
-        database: "mcp-gateway"
-
-    redis:
-      enabled: true
-      auth:
-        password: "your-redis-password"
-
-    mcpGateway:
-      replicaCount: 3
-      resources:
-        requests:
-          memory: "512Mi"
-          cpu: "500m"
-        limits:
-          memory: "1Gi"
-          cpu: "1000m"
-
-    apiserver:
-      replicaCount: 2
-
-    ingress:
-      enabled: true
-      className: "nginx"
-      hosts:
-        - host: mcp-gateway.example.com
-          paths:
-            - path: /
-              pathType: Prefix
-    ```
-  </Step>
-
-  <Step title="安装应用">
-    ```bash
-    helm install mcp-gateway unla/mcp-gateway \
-      --namespace mcp-gateway \
-      --create-namespace \
-      --values values.yaml
-    ```
-  </Step>
-</Steps>
-
-## 配置说明
-
-### 环境变量
-
-主要配置通过 ConfigMap 和 Secret 管理：
-
-<AccordionGroup>
-  <Accordion icon="gear" title="ConfigMap 配置">
-    - 数据库连接信息
-    - Redis 连接信息
-    - 服务端口配置
-    - 日志级别设置
-  </Accordion>
-
-  <Accordion icon="lock" title="Secret 配置">
-    - 数据库密码
-    - Redis 密码
-    - JWT 密钥
-  </Accordion>
-</AccordionGroup>
-
-### 持久化存储
-
-建议为数据库配置持久化存储：
-
-```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: postgres-pvc
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 20Gi
-  storageClassName: fast-ssd
-```
-
-## 监控和日志
-
-### Prometheus 监控
-
-MCP Gateway 暴露 Prometheus 指标，可通过以下配置进行监控：
-
-```yaml
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: mcp-gateway
-spec:
-  selector:
-    matchLabels:
-      app: mcp-gateway
-  endpoints:
-  - port: metrics
-    path: /metrics
-```
-
-### 日志收集
-
-推荐使用 ELK 或 Loki 进行日志收集：
-
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: fluent-bit-config
-data:
-  fluent-bit.conf: |
-    [INPUT]
-        Name tail
-        Path /var/log/containers/*mcp-gateway*.log
-        Parser docker
-        Tag kube.mcp-gateway.*
-```
+<Note>
+此部署方式支持多副本高可用部署，其他更多自定义配置可在下载的 YAML 文件中自行调整。
+</Note>
 
 ## 故障排查
 
 ### 常见问题
 
 <AccordionGroup>
-  <Accordion icon="exclamation-triangle" title="Pod 启动失败">
+  <Accordion icon="sliders" title="Pod 启动失败">
     检查 ConfigMap 和 Secret 配置是否正确：
     ```bash
     kubectl describe pod <pod-name> -n mcp-gateway

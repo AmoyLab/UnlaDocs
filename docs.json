@@ -1,13 +1,13 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "MCP Gateway 文档",
+  "name": "Unla (MCP Gateway)",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#165F98",
+    "light": "#1E7BA8",
+    "dark": "#124A78"
   },
-  "favicon": "/favicon.svg",
+  "favicon": "/images/logo.svg",
   "navigation": {
     "tabs": [
       {
@@ -24,8 +24,8 @@
             "group": "安装部署",
             "pages": [
               "deployment/docker",
-              "deployment/binary",
-              "deployment/k8s"
+              "deployment/k8s",
+              "deployment/binary"
             ]
           },
           {

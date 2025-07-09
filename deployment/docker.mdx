@@ -293,7 +293,7 @@ All-in-One 部署将所有服务打包在一个容器中，适合单机部署或
   <Accordion icon="gear" title="Nginx 配置示例">
     ```nginx
     server {
-        server_name example.docs.unla.amoylab.com;
+        server_name unla.amoylab.com;
 
         location / {
             proxy_pass http://127.0.0.1:8080;
@@ -346,9 +346,9 @@ All-in-One 部署将所有服务打包在一个容器中，适合单机部署或
 
 配置完成后，可通过以下 URL 访问服务：
 
-- **Web 管理界面**: https://example.docs.unla.amoylab.com/
-- **MCP Gateway**: https://example.docs.unla.amoylab.com/gateway/*
-- **示例 MCP 端点**: https://example.docs.unla.amoylab.com/gateway/mcp/user/mcp
+- **Web 管理界面**: https://unla.amoylab.com/
+- **MCP Gateway**: https://unla.amoylab.com/gateway/*
+- **示例 MCP 端点**: https://unla.amoylab.com/gateway/user/mcp
 
 <Note>
 请根据您的实际域名和配置调整上述 URL。
