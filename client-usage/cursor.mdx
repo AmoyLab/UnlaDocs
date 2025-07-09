@@ -1,0 +1,119 @@
+---
+title: "Cursor 配置指南"
+description: "如何在 Cursor 中配置 MCP Gateway"
+---
+
+<Note>
+更详细的 Cursor 配置 MCP 教程请查看 [Cursor 官方文档](https://docs.cursor.com/context/model-context-protocol)
+</Note>
+
+## 配置步骤
+
+这边我简单展示一个最基础的配置方式，确保你已经创建了相关的目录和文件：
+
+<Steps>
+  <Step title="创建配置目录">
+    ```bash
+    mkdir -p .cursor
+    touch .cursor/mcp.json
+    ```
+  </Step>
+
+  <Step title="配置 MCP Server">
+    在 `.cursor/mcp.json` 中添加以下配置，这里我们直接用自己的模拟用户服务来试：
+
+    ```json
+    {
+      "mcpServers": {
+        "user": {
+          "url": "http://localhost:5235/mcp/user/sse"
+        }
+      }
+    }
+    ```
+  </Step>
+
+  <Step title="启用 MCP Server">
+    1. 打开 Cursor 设置
+    2. 在 **MCP** 栏里启用这个 MCP Server
+    3. 启用之后你会看到它变成一个小绿点
+    4. 同时还会列出可用的 Tools
+  </Step>
+</Steps>
+
+## 配置验证
+
+配置完成后，可以在 Cursor 的设置界面中看到：
+
+<CardGroup cols={2}>
+  <Card title="连接状态" icon="circle-check">
+    绿色圆点表示 MCP Server 连接正常
+  </Card>
+  <Card title="可用工具" icon="tools">
+    界面会显示从 MCP Gateway 获取的可用工具列表
+  </Card>
+</CardGroup>
+
+## 使用示例
+
+最后就可以在 Chat 窗口里试一下，比如让它帮你注册一个用户，然后再查询这个用户的信息，跑通就 OK 了。
+
+### 示例对话
+
+```
+帮我注册一个用户 Leo ifuryst@gmail.com
+```
+
+```
+帮我查询一下用户ifuryst@gmail.com，如果没查到帮我注册一下，用户名是Leo
+```
+
+<Warning>
+通过实际测试发现，这个 mock 服务因为涉及名字邮箱，可能在某些情况下引发模型错误导致无法调用，可忽略这种情况，配置实际的 API 使用即可。
+</Warning>
+
+## 常见问题
+
+<AccordionGroup>
+  <Accordion icon="exclamation-triangle" title="连接失败">
+    - 确保 MCP Gateway 服务正在运行
+    - 检查端口 5235 是否可访问
+    - 验证 URL 配置是否正确
+  </Accordion>
+
+  <Accordion icon="tools" title="工具无法使用">
+    - 检查 MCP Server 配置是否正确加载
+    - 验证工具权限配置
+    - 查看 MCP Gateway 日志了解详细错误信息
+  </Accordion>
+
+  <Accordion icon="refresh" title="配置更新不生效">
+    - 重启 Cursor
+    - 重新加载 MCP 配置
+    - 检查配置文件格式是否正确
+  </Accordion>
+</AccordionGroup>
+
+## 高级配置
+
+对于更复杂的使用场景，可以配置多个 MCP Server：
+
+```json
+{
+  "mcpServers": {
+    "user-service": {
+      "url": "http://localhost:5235/mcp/user/sse"
+    },
+    "order-service": {
+      "url": "http://localhost:5235/mcp/order/sse"
+    },
+    "product-service": {
+      "url": "http://localhost:5235/mcp/product/sse"
+    }
+  }
+}
+```
+
+<Tip>
+每个 MCP Server 对应一个业务域，这样可以更好地组织和管理不同的功能模块。
+</Tip>

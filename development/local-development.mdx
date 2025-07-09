@@ -1,0 +1,268 @@
+---
+title: "本地开发环境"
+description: "如何在本地设置和启动完整的 MCP Gateway 开发环境"
+---
+
+本文档介绍如何在本地设置和启动完整的 MCP Gateway 开发环境，包括启动所有必要的服务组件。
+
+## 前提条件
+
+在开始之前，请确保你的系统已安装以下软件：
+
+<CardGroup cols={3}>
+  <Card title="Git" icon="git">
+    版本控制工具
+  </Card>
+  <Card title="Go 1.24.1+" icon="golang">
+    Go 编程语言环境
+  </Card>
+  <Card title="Node.js v20.18.0+" icon="nodejs">
+    JavaScript 运行时环境（包含 npm）
+  </Card>
+</CardGroup>
+
+## 项目架构概览
+
+MCP Gateway 项目由以下几个核心组件组成：
+
+<AccordionGroup>
+  <Accordion icon="server" title="apiserver">
+    提供配置管理、用户接口等 API 服务
+  </Accordion>
+  <Accordion icon="gateway" title="mcp-gateway">
+    核心网关服务，处理 MCP 协议转换
+  </Accordion>
+  <Accordion icon="flask" title="mock-server">
+    模拟用户服务，用于开发测试
+  </Accordion>
+  <Accordion icon="browser" title="web">
+    管理界面前端
+  </Accordion>
+</AccordionGroup>
+
+## 环境搭建步骤
+
+### 1. 获取源码
+
+<Steps>
+  <Step title="Fork 项目">
+    访问 [MCP Gateway 代码仓库](https://github.com/amoylab/unla)，点击 `Fork` 按钮，将项目 fork 到你的 GitHub 账户下
+  </Step>
+
+  <Step title="克隆到本地">
+    ```bash
+    git clone https://github.com/your-github-username/unla.git
+    cd unla
+    ```
+  </Step>
+</Steps>
+
+### 2. 安装依赖
+
+<Steps>
+  <Step title="安装 Go 依赖">
+    ```bash
+    go mod tidy
+    ```
+  </Step>
+
+  <Step title="安装 Node.js 依赖">
+    ```bash
+    cd web
+    npm i
+    cd ..
+    ```
+  </Step>
+</Steps>
+
+### 3. 配置环境
+
+<Steps>
+  <Step title="后端配置">
+    ```bash
+    cp .env.example .env
+    ```
+  </Step>
+
+  <Step title="前端配置">
+    ```bash
+    cd web
+    cp .env.example .env
+    cd ..
+    ```
+  </Step>
+</Steps>
+
+<Note>
+可以不修改任何东西，使用默认配置启动就可以开始开发。你也可以修改配置文件来满足你的环境或开发需求，比如切换 Disk、DB 等存储方式。
+</Note>
+
+## 启动开发服务
+
+你需要 4 个终端窗口来运行所有服务。这种在宿主机上运行多个服务的方式，在开发过程中可以轻松的重启调试。
+
+### 终端 1: 启动 mcp-gateway
+
+```bash
+go run cmd/gateway/main.go
+```
+
+mcp-gateway 默认会在 `http://localhost:5235` 上启动，用于处理 MCP 协议请求。
+
+### 终端 2: 启动 apiserver
+
+```bash
+go run cmd/apiserver/main.go
+```
+
+apiserver 默认会在 `http://localhost:5234` 上启动。
+
+### 终端 3: 启动 mock-server
+
+```bash
+go run cmd/mock-server/main.go
+```
+
+- mock-server 默认会在 `http://localhost:5236` 上启动
+- mock-server-sse 默认会在 `http://localhost:5237` 上启动
+
+### 终端 4: 启动 web 前端
+
+```bash
+cd web
+npm run dev
+```
+
+web 终端运行命令后，会显示访问的地址。
+
+## 访问管理界面
+
+启动完成后，你可以在浏览器中访问终端显示的地址来访问管理界面。
+
+<CardGroup cols={2}>
+  <Card title="默认登录信息" icon="key">
+    - 用户名：根据环境变量 `SUPER_ADMIN_USERNAME` 决定
+    - 密码：根据环境变量 `SUPER_ADMIN_PASSWORD` 决定
+  </Card>
+  <Card title="首次登录" icon="user">
+    登录后可以在管理界面中修改用户名和密码
+  </Card>
+</CardGroup>
+
+## 常见问题
+
+### 环境变量设置
+
+某些服务可能需要特定的环境变量才能正常工作。可以在 `.env` 文件中设置这些变量：
+
+```bash
+# 示例环境变量
+APISERVER_JWT_SECRET_KEY="your_secret_key"
+SUPER_ADMIN_USERNAME="admin"
+SUPER_ADMIN_PASSWORD="admin123"
+```
+
+### 端口冲突
+
+如果遇到端口冲突，可以在环境变量中修改端口配置：
+
+```bash
+MCP_GATEWAY_PORT=5235
+APISERVER_PORT=5234
+MOCK_SERVER_PORT=5236
+```
+
+### 依赖问题
+
+如果遇到依赖安装问题：
+
+<AccordionGroup>
+  <Accordion icon="golang" title="Go 依赖问题">
+    ```bash
+    go clean -modcache
+    go mod tidy
+    ```
+  </Accordion>
+
+  <Accordion icon="nodejs" title="Node.js 依赖问题">
+    ```bash
+    cd web
+    rm -rf node_modules package-lock.json
+    npm install
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## 开发工作流
+
+### 贡献代码流程
+
+<Steps>
+  <Step title="添加上游仓库">
+    ```bash
+    git remote add upstream git@github.com:amoylab/unla.git
+    ```
+  </Step>
+
+  <Step title="同步上游代码">
+    ```bash
+    git pull upstream main
+    ```
+  </Step>
+
+  <Step title="创建功能分支">
+    ```bash
+    git switch -c feat/your-feature-name
+    ```
+  </Step>
+
+  <Step title="开发完成后推送">
+    ```bash
+    git push origin feat/your-feature-name
+    ```
+  </Step>
+
+  <Step title="创建 Pull Request">
+    在 GitHub 上创建 Pull Request，将你的分支合并到主仓库的 main 分支
+  </Step>
+</Steps>
+
+### 分支命名规范
+
+<CardGroup cols={2}>
+  <Card title="新功能" icon="plus">
+    使用 `feat/` 前缀，如 `feat/add-auth-module`
+  </Card>
+  <Card title="Bug 修复" icon="bug">
+    使用 `fix/` 前缀，如 `fix/memory-leak`
+  </Card>
+</CardGroup>
+
+### 开发注意事项
+
+<AccordionGroup>
+  <Accordion icon="test-tube" title="测试">
+    在提交 PR 之前，确保你的代码已经通过所有测试
+  </Accordion>
+
+  <Accordion icon="sync" title="代码同步">
+    保持你的 fork 仓库与上游仓库同步，避免代码冲突
+  </Accordion>
+
+  <Accordion icon="code" title="代码规范">
+    遵循项目的代码规范和提交信息格式
+  </Accordion>
+</AccordionGroup>
+
+## 下一步
+
+成功启动本地开发环境后，你可以：
+
+<CardGroup cols={2}>
+  <Card title="了解架构" icon="sitemap" href="/development/architecture">
+    查看架构文档深入了解系统组件
+  </Card>
+  <Card title="学习配置" icon="gear" href="/configuration/gateways">
+    阅读配置指南学习如何配置网关
+  </Card>
+</CardGroup>

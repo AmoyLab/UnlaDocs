@@ -1,0 +1,227 @@
+---
+title: "Go Template 使用指南"
+description: "在 MCP Gateway 中如何使用 Go Template 处理请求和响应数据"
+---
+
+本文档介绍在 MCP Gateway 中如何使用 Go Template 来处理请求和响应数据。Go Template 提供了强大的模板功能，可以帮助我们灵活地处理数据转换和格式化。
+
+## 基础语法
+
+Go Template 使用 `{{}}` 作为定界符，在定界符内可以使用各种函数和变量。在 MCP Gateway 中，我们主要使用以下几种变量：
+
+<CardGroup cols={2}>
+  <Card title="配置变量" icon="gear">
+    - `.Config`: 服务级别的配置
+    - `.Args`: 请求参数
+  </Card>
+  <Card title="运行时变量" icon="play">
+    - `.Request`: 原始请求信息
+    - `.Response`: 上游服务响应信息
+  </Card>
+</CardGroup>
+
+## 常见用例
+
+### 1. 从环境变量获取配置
+
+```yaml
+config:
+  Authorization: 'Bearer {{ env "AUTH_TOKEN" }}'  # 从环境变量中获取配置
+```
+
+<Note>
+使用 `env` 函数可以安全地从环境变量中获取敏感信息，避免在配置文件中硬编码。
+</Note>
+
+### 2. 从请求头中提取值
+
+```yaml
+headers:
+  Authorization: "{{.Request.Headers.Authorization}}"   # 透传客户端的 Authorization 头
+  Cookie: "{{.Config.Cookie}}"                          # 使用服务配置中的值
+```
+
+### 3. 构建请求体
+
+```yaml
+requestBody: |-
+  {
+    "username": "{{.Args.username}}",
+    "email": "{{.Args.email}}"
+  }
+```
+
+### 4. 处理响应数据
+
+```yaml
+responseBody: |-
+  {
+    "id": "{{.Response.Data.id}}",
+    "username": "{{.Response.Data.username}}",
+    "email": "{{.Response.Data.email}}",
+    "createdAt": "{{.Response.Data.createdAt}}"
+  }
+```
+
+### 5. 处理嵌套的响应数据
+
+对于复杂的嵌套数据结构，可以层层访问：
+
+```yaml
+responseBody: |-
+  {
+    "id": "{{.Response.Data.id}}",
+    "username": "{{.Response.Data.username}}",
+    "email": "{{.Response.Data.email}}",
+    "createdAt": "{{.Response.Data.createdAt}}",
+    "preferences": {
+      "isPublic": {{.Response.Data.preferences.isPublic}},
+      "showEmail": {{.Response.Data.preferences.showEmail}},
+      "theme": "{{.Response.Data.preferences.theme}}",
+      "tags": {{.Response.Data.preferences.tags}}
+    }
+  }
+```
+
+### 6. 处理数组数据
+
+当需要处理响应中的数组数据时，可以使用 Go Template 的 range 功能：
+
+```yaml
+responseBody: |-
+  {
+    "total": "{{.Response.Data.total}}",
+    "rows": [
+      {{- $len := len .Response.Data.rows -}}
+      {{- $rows := fromJSON .Response.Data.rows }}
+      {{- range $i, $e := $rows }}
+      {
+        "id": {{ $e.id }},
+        "detail": "{{ $e.detail }}",
+        "deviceName": "{{ $e.deviceName }}"
+      }{{ if lt (add $i 1) $len }},{{ end }}
+      {{- end }}
+    ]
+  }
+```
+
+<AccordionGroup>
+  <Accordion icon="code" title="数组处理技巧说明">
+    这个例子展示了如何：
+    1. 使用 `fromJSON` 函数将 JSON 字符串转换为可遍历的对象
+    2. 使用 `range` 遍历数组
+    3. 使用 `len` 函数获取数组长度
+    4. 使用 `add` 函数进行数学运算
+    5. 使用条件语句 `if` 来控制数组元素之间的逗号分隔
+  </Accordion>
+</AccordionGroup>
+
+### 7. 在 URL 中使用参数
+
+动态构建 URL 路径：
+
+```yaml
+endpoint: "http://localhost:5236/users/{{.Args.email}}/preferences"
+```
+
+### 8. 处理复杂对象数据
+
+当需要将请求或者响应的对象、数组之类的复杂结构转成 JSON 的话，可以使用 `toJSON` 函数：
+
+```yaml
+requestBody: |-
+  {
+    "isPublic": {{.Args.isPublic}},
+    "showEmail": {{.Args.showEmail}},
+    "theme": "{{.Args.theme}}",
+    "tags": {{.Args.tags}},
+    "settings": {{ toJSON .Args.settings }}
+  }
+```
+
+<Tip>
+此处的 `settings` 是一个复杂对象，使用 `toJSON` 函数后，会自动将 `settings` 转换为 JSON 字符串。
+</Tip>
+
+## 内置函数
+
+目前支持以下内置函数：
+
+<AccordionGroup>
+  <Accordion icon="leaf" title="env - 环境变量">
+    获取环境变量的值
+    ```yaml
+    Authorization: 'Bearer {{ env "AUTH_TOKEN" }}'
+    ```
+  </Accordion>
+
+  <Accordion icon="plus" title="add - 数学运算">
+    执行整数加法运算
+    ```yaml
+    {{ if lt (add $i 1) $len }},{{ end }}
+    ```
+  </Accordion>
+
+  <Accordion icon="arrow-down" title="fromJSON - JSON 解析">
+    将 JSON 字符串转换为可遍历的对象
+    ```yaml
+    {{- $rows := fromJSON .Response.Data.rows }}
+    ```
+  </Accordion>
+
+  <Accordion icon="arrow-up" title="toJSON - JSON 序列化">
+    将对象转换为 JSON 字符串
+    ```yaml
+    "settings": {{ toJSON .Args.settings }}
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## 模板调试技巧
+
+<Steps>
+  <Step title="使用日志输出">
+    在开发过程中，可以通过日志查看模板变量的实际值
+  </Step>
+  <Step title="分步构建">
+    对于复杂的模板，建议先构建简单版本，然后逐步添加复杂逻辑
+  </Step>
+  <Step title="测试边界情况">
+    确保模板在各种数据情况下都能正确工作，包括空值、null 值等
+  </Step>
+</Steps>
+
+## 最佳实践
+
+<AccordionGroup>
+  <Accordion icon="shield-check" title="安全性">
+    - 避免在模板中直接暴露敏感信息
+    - 使用环境变量存储密钥和密码
+    - 对用户输入进行适当的验证和转义
+  </Accordion>
+
+  <Accordion icon="zap" title="性能">
+    - 避免在模板中进行复杂的计算
+    - 合理使用缓存机制
+    - 对于大量数据处理，考虑在上游服务中预处理
+  </Accordion>
+
+  <Accordion icon="tools" title="维护性">
+    - 保持模板简洁明了
+    - 添加适当的注释说明
+    - 使用有意义的变量名
+  </Accordion>
+</AccordionGroup>
+
+## 扩展功能
+
+如果需要添加新的模板函数，可以：
+
+1. **描述具体的使用场景**，创建 issue 说明需求
+2. **欢迎实现后 PR**，但目前只接受通用用途的函数
+
+## 更多资源
+
+<Card title="Go Template 官方文档" icon="book" href="https://pkg.go.dev/text/template">
+  查看 Go Template 的完整文档和高级用法
+</Card>

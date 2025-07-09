@@ -1,0 +1,179 @@
+---
+title: "系统架构"
+description: "MCP Gateway 系统的整体架构设计和模块说明"
+---
+
+概述了 MCP Gateway 系统的整体架构，包括网关本身、管理后台、配套 API、存储机制以及与外部服务的集成方式。
+
+## 架构图
+
+<Warning>
+架构图正在更新中，将在后续版本中提供详细的系统架构图。
+</Warning>
+
+## 核心模块
+
+### MCP 网关（mcp-gateway）
+
+MCP Gateway 是系统的核心组件，负责处理所有的 MCP 协议请求：
+
+<CardGroup cols={2}>
+  <Card title="请求处理" icon="globe">
+    - **统一入口**：`/*` 监听所有 HTTP 请求
+    - **路由分发**：根据路由前缀动态分发请求
+  </Card>
+  <Card title="协议转换" icon="arrows-spin">
+    - **协议解析**：解析 JSON-RPC 格式请求
+    - **Tool 分发**：解析工具名称，构造调用参数
+  </Card>
+</CardGroup>
+
+#### 主要功能
+
+<Steps>
+  <Step title="请求路由">
+    根据路由前缀和后缀（`/sse`、`/message`、`/mcp`）进行请求分发
+  </Step>
+  <Step title="协议解析">
+    对 JSON-RPC 格式进行解析，提取方法与参数
+  </Step>
+  <Step title="服务调用">
+    针对外部服务发起调用并解析结果
+  </Step>
+  <Step title="配置读取">
+    动态加载和应用配置信息
+  </Step>
+</Steps>
+
+### 管理后台（web）
+
+提供可视化的管理界面，包含以下核心模块：
+
+<AccordionGroup>
+  <Accordion icon="gear" title="代理配置模块">
+    用于配置 MCP 网关代理和工具，支持图形化配置界面
+  </Accordion>
+  <Accordion icon="comments" title="对话实验台">
+    用于测试 MCP 的简易 Chat，主要提供给开发者和需要集成到自研系统中的用户参考
+  </Accordion>
+  <Accordion icon="users" title="用户管理模块">
+    用户权限、信息维护和访问控制
+  </Accordion>
+</AccordionGroup>
+
+### 管理后台后端服务（apiserver）
+
+提供完整的后端 API 服务：
+
+<CardGroup cols={2}>
+  <Card title="API 服务" icon="server">
+    - 配置管理 API
+    - 用户接口管理
+    - 聊天记录查询
+  </Card>
+  <Card title="配置管理" icon="database">
+    - 配置写入存储
+    - 热更新通知
+    - 权限控制
+  </Card>
+</CardGroup>
+
+### 存储系统
+
+#### 配置存储
+
+存储所有 MCP 服务、工具、路由等配置信息：
+
+<CardGroup cols={3}>
+  <Card title="磁盘存储" icon="folder">
+    YAML 文件形式，适合开发环境
+  </Card>
+  <Card title="SQLite" icon="database">
+    轻量级数据库，适合单机部署
+  </Card>
+  <Card title="PostgreSQL/MySQL" icon="server">
+    企业级数据库，适合生产环境
+  </Card>
+</CardGroup>
+
+#### Web 数据存储
+
+存储用户数据、会话记录等：
+
+- 用户账户信息
+- 聊天会话历史
+- 系统配置数据
+- 操作日志记录
+
+### 外部服务集成
+
+MCP Gateway 设计为与现有业务系统无缝集成：
+
+<AccordionGroup>
+  <Accordion icon="api" title="REST API 服务">
+    支持标准的 REST API 调用，包括 GET、POST、PUT、DELETE 等方法
+  </Accordion>
+  <Accordion icon="webhook" title="Webhook 服务">
+    支持 Webhook 回调和事件触发机制
+  </Accordion>
+  <Accordion icon="database" title="数据库服务">
+    可直接与现有数据库系统集成，支持多种数据库类型
+  </Accordion>
+</AccordionGroup>
+
+## 数据流
+
+<Steps>
+  <Step title="请求接收">
+    MCP Client 发送请求到 MCP Gateway 的指定端点
+  </Step>
+  <Step title="协议解析">
+    Gateway 解析 MCP 协议格式，提取工具调用信息
+  </Step>
+  <Step title="配置查找">
+    根据工具名称查找对应的配置信息
+  </Step>
+  <Step title="服务调用">
+    使用配置的模板和参数调用后端服务
+  </Step>
+  <Step title="响应处理">
+    处理后端服务响应，转换为 MCP 协议格式
+  </Step>
+  <Step title="结果返回">
+    将处理结果返回给 MCP Client
+  </Step>
+</Steps>
+
+## 部署架构
+
+### 单机部署
+
+<CardGroup cols={1}>
+  <Card title="All-in-One 部署" icon="box">
+    所有服务运行在同一台机器上，适合开发和测试环境
+  </Card>
+</CardGroup>
+
+### 分布式部署
+
+<CardGroup cols={2}>
+  <Card title="微服务架构" icon="cubes">
+    各个组件独立部署，支持横向扩展和负载均衡
+  </Card>
+  <Card title="容器化部署" icon="docker">
+    使用 Docker 和 Kubernetes 进行容器化部署
+  </Card>
+</CardGroup>
+
+## 扩展性设计
+
+MCP Gateway 采用模块化设计，支持以下扩展：
+
+- **协议扩展**：支持新的 MCP 协议版本
+- **存储扩展**：支持新的存储后端
+- **认证扩展**：支持多种认证机制
+- **监控扩展**：集成各种监控和日志系统
+
+<Tip>
+想要深入了解各个组件的具体实现，请参考对应的配置文档和开发指南。
+</Tip>

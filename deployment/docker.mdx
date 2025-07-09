@@ -1,0 +1,355 @@
+---
+title: "Docker 部署"
+description: "使用 Docker 部署 MCP Gateway 的完整指南"
+---
+
+## 镜像说明
+
+MCP Gateway 提供两种部署方式：
+
+<CardGroup cols={2}>
+  <Card title="All-in-One 部署" icon="box">
+    所有服务打包在一个容器中，适合单机部署或本机使用
+  </Card>
+  <Card title="多容器部署" icon="cubes">
+    各个服务独立部署，适合生产环境或集群部署
+  </Card>
+</CardGroup>
+
+### 镜像仓库
+
+镜像发布到以下三个仓库：
+
+- **Docker Hub**: `docker.io/ifuryst/unla-*`
+- **GitHub Container Registry**: `ghcr.io/amoylab/unla/*`
+- **阿里云容器镜像服务**: `registry.ap-southeast-1.aliyuncs.com/amoylab/unla-*`
+
+<Note>
+GHCR 支持多层目录，所以组织形式会更清晰，Docker 和阿里云的仓库只能一层目录，因此后面镜像名用 `-` 拼接。
+</Note>
+
+### 镜像标签
+
+- `latest`: 最新版本
+- `vX.Y.Z`: 特定版本号
+
+<Warning>
+目前 MCP Gateway 正在快速迭代中！因此建议通过版本号部署会更可靠一点。
+</Warning>
+
+### 可用镜像
+
+```bash
+# All-in-One 版本
+docker pull docker.io/ifuryst/unla-allinone:latest
+docker pull ghcr.io/amoylab/unla/allinone:latest
+docker pull registry.ap-southeast-1.aliyuncs.com/amoylab/unla-allinone:latest
+
+# API Server
+docker pull docker.io/ifuryst/unla-apiserver:latest
+docker pull ghcr.io/amoylab/unla/apiserver:latest
+docker pull registry.ap-southeast-1.aliyuncs.com/amoylab/unla-apiserver:latest
+
+# MCP Gateway
+docker pull docker.io/ifuryst/unla-mcp-gateway:latest
+docker pull ghcr.io/amoylab/unla/mcp-gateway:latest
+docker pull registry.ap-southeast-1.aliyuncs.com/amoylab/unla-mcp-gateway:latest
+
+# Mock User Service
+docker pull docker.io/ifuryst/unla-mock-server:latest
+docker pull ghcr.io/amoylab/unla/mock-server:latest
+docker pull registry.ap-southeast-1.aliyuncs.com/amoylab/unla-mock-server:latest
+
+# Web 前端
+docker pull docker.io/ifuryst/unla-web:latest
+docker pull ghcr.io/amoylab/unla/web:latest
+docker pull registry.ap-southeast-1.aliyuncs.com/amoylab/unla-web:latest
+```
+
+## All-in-One 部署
+
+All-in-One 部署将所有服务打包在一个容器中，适合单机部署或本机使用。包含以下服务：
+
+- **API Server**: 管理平台后端，可理解为控制面
+- **MCP Gateway**: 核心服务，负责实际的网关服务，可理解为数据面
+- **Mock User Service**: 模拟用户服务，提供测试用的用户服务
+- **Web 前端**: 管理平台前端，提供可视化的管理界面
+- **Nginx**: 反向代理其他几个服务
+
+使用 Supervisor 管理服务进程，日志会全部输出到 stdout。
+
+### 端口说明
+
+<CardGroup cols={2}>
+  <Card title="对外服务端口" icon="globe">
+    - `8080`: Web 界面端口
+    - `5235`: MCP Gateway 端口
+  </Card>
+  <Card title="内部服务端口" icon="server">
+    - `5234`: API Server 端口
+    - `5335`: MCP Gateway 管理端口
+    - `5236`: Mock User Service 端口
+  </Card>
+</CardGroup>
+
+<Warning>
+`5335` 是 MCP Gateway 管理端口，承载诸如 reload 的内部接口，生产环境切勿对外暴露！
+</Warning>
+
+### 数据持久化
+
+建议挂载以下目录：
+- `/app/configs`: 配置文件目录
+- `/app/data`: 数据目录
+- `/app/.env`: 环境变量文件
+
+### 部署步骤
+
+<Steps>
+  <Step title="创建目录并下载配置">
+    ```bash
+    mkdir -p unla/{configs,data}
+    cd unla/
+    curl -sL https://raw.githubusercontent.com/amoylab/unla/refs/heads/main/configs/apiserver.yaml -o configs/apiserver.yaml
+    curl -sL https://raw.githubusercontent.com/amoylab/unla/refs/heads/main/configs/mcp-gateway.yaml -o configs/mcp-gateway.yaml
+    curl -sL https://raw.githubusercontent.com/amoylab/unla/refs/heads/main/.env.example -o .env.allinone
+    ```
+  </Step>
+  <Step title="启动容器">
+    ```bash
+    # 使用阿里云容器镜像服务镜像（建议在中国境内使用）
+    docker run -d \
+               --name unla \
+               -p 8080:80 \
+               -p 5234:5234 \
+               -p 5235:5235 \
+               -p 5335:5335 \
+               -p 5236:5236 \
+               -e ENV=production \
+               -v $(pwd)/configs:/app/configs \
+               -v $(pwd)/data:/app/data \
+               -v $(pwd)/.env.allinone:/app/.env \
+               --restart unless-stopped \
+               registry.ap-southeast-1.aliyuncs.com/amoylab/unla-allinone:latest
+
+    # 使用 GitHub Container Registry 镜像
+    docker run -d \
+               --name unla \
+               -p 8080:80 \
+               -p 5234:5234 \
+               -p 5235:5235 \
+               -p 5335:5335 \
+               -p 5236:5236 \
+               -e ENV=production \
+               -v $(pwd)/configs:/app/configs \
+               -v $(pwd)/data:/app/data \
+               -v $(pwd)/.env.allinone:/app/.env \
+               --restart unless-stopped \
+               ghcr.io/amoylab/unla/allinone:latest
+    ```
+  </Step>
+</Steps>
+
+### 注意事项
+
+<AccordionGroup>
+  <Accordion icon="shield-check" title="安全配置">
+    1. 确保配置文件和环境变量文件正确配置
+    2. 强烈建议生产环境使用强密码
+    3. 不要对外暴露管理端口 `5335`
+  </Accordion>
+  <Accordion icon="tag" title="版本管理">
+    1. 建议使用版本号标签而不是 latest
+    2. 生产环境建议配置适当的资源限制
+  </Accordion>
+  <Accordion icon="folder" title="权限配置">
+    确保挂载的目录有正确的权限
+  </Accordion>
+</AccordionGroup>
+
+## 多容器部署
+
+多个服务独立部署，适合生产环境或集群部署。包含以下服务：
+
+- **mcp-gateway**: 核心服务，负责实际的网关服务，可理解为数据面
+- **web(包含apiserver)**: 管理平台及后端，可理解为控制面
+- **mock-server**: 模拟服务，提供测试用的服务
+
+适合在生产环境使用，可以按需部署，尤其针对 `mcp-gateway` 可以多副本部署，实现高可用。
+
+### 部署特点
+
+<CardGroup cols={3}>
+  <Card title="数据库支持" icon="database">
+    使用 PostgreSQL 作为数据库存储 session、代理配置等信息
+  </Card>
+  <Card title="缓存支持" icon="bolt">
+    使用 Redis 用于配置更新通知、OAuth 存储等用途
+  </Card>
+  <Card title="负载均衡" icon="scale-balanced">
+    支持多副本部署和负载均衡配置
+  </Card>
+</CardGroup>
+
+### Docker Compose 部署
+
+<Steps>
+  <Step title="下载配置文件">
+    ```bash
+    curl -sL https://raw.githubusercontent.com/amoylab/unla/refs/heads/main/deploy/docker/multi/docker-compose.yml -o docker-compose.yml
+    curl -sL https://raw.githubusercontent.com/amoylab/unla/refs/heads/main/.env.example -o .env
+    ```
+  </Step>
+  <Step title="修改配置">
+    编辑 `docker-compose.yml` 和 `.env` 文件：
+    1. 修改数据库、Redis 相关的账号密码
+    2. 按需修改暴露的端口
+    3. 配置 LLM 服务参数
+  </Step>
+  <Step title="启动服务">
+    ```bash
+    docker compose up -d
+    ```
+  </Step>
+  <Step title="配置负载均衡">
+    按需配置 Nginx 等 LB 层
+  </Step>
+</Steps>
+
+### 示例配置
+
+<AccordionGroup>
+  <Accordion icon="file-code" title="docker-compose.yml">
+    ```yaml
+    services:
+      postgres:
+        image: postgres:16
+        environment:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: "**********"
+          POSTGRES_DB: mcp-gateway
+        volumes:
+          - ./db:/var/lib/postgresql/data
+          - /etc/localtime:/etc/localtime:ro
+          - /etc/timezone:/etc/timezone:ro
+        restart: always
+
+      redis:
+        image: redis:7
+        ports:
+          - "6379:6379"
+        volumes:
+          - ./redis:/data
+          - /etc/localtime:/etc/localtime:ro
+          - /etc/timezone:/etc/timezone:ro
+        command: redis-server --appendonly yes --save "900 1" --save "300 10" --save "60 10000" --requirepass "**********"
+        restart: always
+
+      web:
+        image: ghcr.io/amoylab/unla/web:latest
+        ports:
+          - "8080:80"
+          - "5234:5234"
+        environment:
+          - ENV=production
+          - TZ=Asia/Shanghai
+        volumes:
+          - ./.env:/app/.env
+          - ./data:/app/data
+        depends_on:
+          - postgres
+          - mcp-gateway
+          - mock-server
+        restart: always
+
+      mcp-gateway:
+        image: ghcr.io/amoylab/unla/mcp-gateway:latest
+        ports:
+          - "5235:5235"
+        environment:
+          - ENV=production
+          - TZ=Asia/Shanghai
+        volumes:
+          - ./.env:/app/.env
+          - ./data:/app/data
+        depends_on:
+          - postgres
+        restart: always
+
+      mock-server:
+        image: ghcr.io/amoylab/unla/mock-server:latest
+        ports:
+          - "5236:5236"
+        environment:
+          - ENV=production
+          - TZ=Asia/Shanghai
+        volumes:
+          - ./.env:/app/.env
+        depends_on:
+          - postgres
+        restart: always
+    ```
+  </Accordion>
+  <Accordion icon="gear" title="Nginx 配置示例">
+    ```nginx
+    server {
+        server_name example.docs.unla.amoylab.com;
+
+        location / {
+            proxy_pass http://127.0.0.1:8080;
+            proxy_set_header Host $host;
+        }
+
+        location /api/ {
+            proxy_pass http://127.0.0.1:5234/api/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        location /ws/ {
+            proxy_pass http://127.0.0.1:5234/api/ws/;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        location /gateway/ {
+            proxy_pass http://127.0.0.1:5235/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+
+            proxy_buffering off;
+            proxy_cache off;
+            chunked_transfer_encoding off;
+            proxy_read_timeout 3600s;
+            proxy_send_timeout 3600s;
+        }
+
+        location /mock/ {
+            proxy_pass http://127.0.0.1:5236/;
+            proxy_set_header Host $host;
+        }
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### 重要访问 URL
+
+配置完成后，可通过以下 URL 访问服务：
+
+- **Web 管理界面**: https://example.docs.unla.amoylab.com/
+- **MCP Gateway**: https://example.docs.unla.amoylab.com/gateway/*
+- **示例 MCP 端点**: https://example.docs.unla.amoylab.com/gateway/mcp/user/mcp
+
+<Note>
+请根据您的实际域名和配置调整上述 URL。
+</Note>

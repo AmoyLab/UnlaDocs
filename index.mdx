@@ -1,71 +1,187 @@
 ---
-title: Introduction
-description: "Welcome to the home of your new documentation"
+title: "Unla - MCP Gateway"
+description: "🚀 将您现有的 MCP 服务和 API 通过配置转换为 MCP 服务 — 无需更改一行代码"
 ---
 
 <img
   className="block dark:hidden"
   src="/images/hero-light.png"
-  alt="Hero Light"
+  alt="MCP Gateway Hero Light"
 />
 <img
   className="hidden dark:block"
   src="/images/hero-dark.png"
-  alt="Hero Dark"
+  alt="MCP Gateway Hero Dark"
 />
 
-## Setting up
+## 什么是 Unla？
 
-The first step to world-class documentation is setting up your editing environments.
+**Unla** 是一个用 Go 语言编写的轻量级、高可用网关服务。它使个人和组织能够通过配置将现有的 MCP 服务和 API 转换为符合 [MCP 协议](https://modelcontextprotocol.io/) 的服务 — 全程无需更改代码。
+
+<Note>
+⚡ **注意**：Unla 正在快速开发中！我们努力保持向后兼容性，但不能 100% 保证。升级时请仔细检查版本变更。由于快速迭代，文档更新有时可能滞后。如果遇到任何问题，欢迎通过 [Discord](https://discord.gg/udf69cT9TY) 或 [Issues](https://github.com/amoylab/unla/issues) 寻求帮助 ❤️
+</Note>
+
+## 🔧 核心设计原则
 
 <CardGroup cols={2}>
-  <Card
-    title="Edit Your Docs"
-    icon="pen-to-square"
-    href="https://mintlify.com/docs/quickstart"
-  >
-    Get your docs set up locally for easy development
+  <Card title="✅ 零侵入性" icon="shield-check">
+    平台无关，支持在裸机、虚拟机、ECS、Kubernetes 等环境部署，无需修改现有基础设施
   </Card>
-  <Card
-    title="Preview Changes"
-    icon="image"
-    href="https://mintlify.com/docs/development"
-  >
-    Preview your changes before you push to make sure they're perfect
+  <Card title="🔄 配置驱动" icon="gear">
+    使用 YAML 配置将传统 API 转换为 MCP 服务 — 无需代码
+  </Card>
+  <Card title="🪶 轻量高效" icon="feather">
+    专为最小资源使用而设计，不牺牲性能或可用性
+  </Card>
+  <Card title="🧭 内置管理界面" icon="browser">
+    开箱即用的 Web 界面，简化设置并减少运维开销
   </Card>
 </CardGroup>
 
-## Make it yours
+## 架构
 
-Update your docs to your brand and add valuable content for the best user conversion.
+```mermaid
+flowchart TD
+ subgraph BACKEND["外部服务"]
+        C1["APIs(HTTP)"]
+        C2["MCP Servers"]
+  end
+ subgraph WEB["配置管理"]
+        W["Web Admin"]
+        D["apiserver"]
+  end
+ subgraph GATEWAY["网关"]
+        B["MCP Gateway"]
+  end
+ subgraph DATABASE["数据库"]
+        E["DB / Disk"]
+  end
+
+ subgraph Notifier["配置更新通知"]
+        F["OS Signal / API / Redis"]
+  end
+ subgraph UNLA["Unla"]
+        WEB
+        GATEWAY
+        DATABASE
+        Notifier
+  end
+ subgraph CLIENT["客户端"]
+        A["Client (支持 MCP 协议): Claude Code / Cursor / Cline / Cherry Studio / DeepChat / LobeChat ..."]
+  end
+
+    B --> C1 & C2
+    A --> B
+    W -- 配置管理 --> D
+    D -- 读写配置 --> E
+    E -- 同步配置 --> B
+    D --> F --> B
+
+    C1:::api
+    C2:::api
+    W:::web
+    D:::web
+    B:::gateway
+    E:::db
+    A:::client
+    F:::db
+
+    class CLIENT,UNLA,BACKEND default
+    class WEB,Notifier,DATABASE,GATEWAY block
+
+    classDef client fill:#e0f7fa,stroke:#00acc1,stroke-width:2,font-weight:bold,color:#004d40
+    classDef gateway fill:#fff8e1,stroke:#ffb300,stroke-width:2,font-weight:bold,color:#5d4037
+    classDef api fill:#e8f5e9,stroke:#66bb6a,stroke-width:2,font-weight:bold,color:#1b5e20
+    classDef db fill:#fce4ec,stroke:#f06292,stroke-width:2,font-weight:bold,color:#880e4f
+    classDef web fill:#ede7f6,stroke:#7e57c2,stroke-width:2,font-weight:bold,color:#311b92
+    classDef default fill:#ffffff,stroke:#ccc,stroke-width:1,color:#000000
+    classDef block fill:#fdfdfd,stroke:#ccc,stroke-width:1,color:#000000
+```
+
+## 🚀 核心功能
+
+### 🔌 协议与代理能力
+- ✅ 支持将 RESTful API 转换为 MCP 服务
+- ✅ 支持代理 MCP 服务
+- ✅ 支持 MCP SSE
+- ✅ 支持 MCP Streamable HTTP
+- ✅ 支持包括文本、图像和音频的 MCP 响应
+- 🔄 支持将 gRPC 转换为 MCP 服务（开发中）
+- 🔄 支持将 WebSocket 转换为 MCP 服务（开发中）
+
+### 🧠 会话与多租户支持
+- ✅ 持久化和可恢复的会话支持
+- ✅ 多租户支持
+- 🔄 支持 MCP 服务分组和聚合（开发中）
+
+### 🛠 配置与管理
+- ✅ 自动配置获取和无缝热重载
+- ✅ 配置持久化（磁盘/SQLite/PostgreSQL/MySQL）
+- ✅ 通过 OS 信号、HTTP 或 Redis PubSub 进行配置同步
+- ✅ 配置版本控制
+
+### 🔐 安全与认证
+- ✅ 基于 OAuth 的 MCP 服务预认证支持
+
+### 📦 部署与运维
+- ✅ 多副本服务支持
+- ✅ Docker 支持
+- ✅ Kubernetes 和 Helm 部署支持
 
 <CardGroup cols={2}>
   <Card
-    title="Customize Style"
-    icon="palette"
-    href="https://mintlify.com/docs/settings/global"
+    title="快速开始"
+    icon="rocket"
+    href="/quickstart"
   >
-    Customize your docs to your company's colors and brands
+    快速部署并启动 Unla MCP Gateway 服务
   </Card>
   <Card
-    title="Reference APIs"
-    icon="code"
-    href="https://mintlify.com/docs/api-playground/openapi"
+    title="Docker部署"
+    icon="docker"
+    href="/deployment/docker"
   >
-    Automatically generate endpoints from an OpenAPI spec
+    使用 Docker 容器化部署方案
   </Card>
   <Card
-    title="Add Components"
-    icon="screwdriver-wrench"
-    href="https://mintlify.com/docs/content/components/accordions"
+    title="MCP Gateway配置"
+    icon="gear"
+    href="/configuration/mcp-gateway"
   >
-    Build interactive features and designs to guide your users
+    配置 MCP Gateway 服务参数和选项
   </Card>
   <Card
-    title="Get Inspiration"
-    icon="stars"
-    href="https://mintlify.com/customers"
+    title="客户端集成"
+    icon="plug"
+    href="/client-usage/cursor"
   >
-    Check out our showcase of our favorite documentation
+    支持多种 MCP 客户端无缝集成
+  </Card>
+</CardGroup>
+
+## 🌐 社区与支持
+
+<CardGroup cols={3}>
+  <Card
+    title="Discord 社区"
+    icon="discord"
+    href="https://discord.gg/udf69cT9TY"
+  >
+    加入我们的 Discord 社区获取实时支持
+  </Card>
+  <Card
+    title="GitHub Issues"
+    icon="github"
+    href="https://github.com/amoylab/unla/issues"
+  >
+    提交问题和功能请求
+  </Card>
+  <Card
+    title="在线文档"
+    icon="book"
+    href="https://mcp.ifuryst.com"
+  >
+    查看完整的在线文档
   </Card>
 </CardGroup>

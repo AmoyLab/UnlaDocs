@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "MCP Gateway 文档",
   "colors": {
     "primary": "#16A34A",
     "light": "#07C983",
@@ -11,40 +11,58 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "指南",
         "groups": [
           {
-            "group": "Get Started",
+            "group": "快速开始",
             "pages": [
               "index",
-              "quickstart",
-              "development"
+              "quickstart"
             ]
           },
           {
-            "group": "Essentials",
+            "group": "安装部署",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets"
+              "deployment/docker",
+              "deployment/binary",
+              "deployment/k8s"
+            ]
+          },
+          {
+            "group": "配置说明",
+            "pages": [
+              "configuration/apiserver",
+              "configuration/mcp-gateway",
+              "configuration/templates"
+            ]
+          },
+          {
+            "group": "客户端使用",
+            "pages": [
+              "client-usage/cursor",
+              "client-usage/cherry-studio"
+            ]
+          },
+          {
+            "group": "开发文档",
+            "pages": [
+              "development/architecture",
+              "development/local-development"
             ]
           }
         ]
       },
       {
-        "tab": "API Reference",
+        "tab": "API 参考",
         "groups": [
           {
-            "group": "API Documentation",
+            "group": "API 文档",
             "pages": [
               "api-reference/introduction"
             ]
           },
           {
-            "group": "Endpoint Examples",
+            "group": "端点示例",
             "pages": [
               "api-reference/endpoint/get",
               "api-reference/endpoint/create",
@@ -58,19 +76,19 @@
     "global": {
       "anchors": [
         {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
+          "anchor": "GitHub",
+          "href": "https://github.com/amoylab/unla",
+          "icon": "github"
         },
         {
-          "anchor": "Community",
-          "href": "https://mintlify.com/community",
-          "icon": "slack"
+          "anchor": "社区讨论",
+          "href": "https://github.com/amoylab/unla/discussions",
+          "icon": "comments"
         },
         {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
+          "anchor": "问题反馈",
+          "href": "https://github.com/amoylab/unla/issues",
+          "icon": "bug"
         }
       ]
     }
@@ -82,21 +100,19 @@
   "navbar": {
     "links": [
       {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "label": "获取支持",
+        "href": "https://github.com/amoylab/unla/issues"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "label": "立即部署",
+      "href": "https://github.com/amoylab/unla"
     }
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "github": "https://github.com/amoylab/unla"
     }
   }
 }

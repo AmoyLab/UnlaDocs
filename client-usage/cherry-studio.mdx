@@ -1,0 +1,116 @@
+---
+title: "Cherry Studio 配置指南"
+description: "如何在 Cherry Studio 中配置 MCP Gateway"
+---
+
+Cherry Studio 是另一个支持 MCP (Model Context Protocol) 的 AI 客户端工具。本文档介绍如何在 Cherry Studio 中配置 MCP Gateway。
+
+## 配置步骤
+
+<Steps>
+  <Step title="打开 Cherry Studio">
+    启动 Cherry Studio 应用程序
+  </Step>
+
+  <Step title="进入设置">
+    在 Cherry Studio 中找到设置或配置选项
+  </Step>
+
+  <Step title="配置 MCP 连接">
+    添加 MCP Gateway 的连接信息：
+    - **Server URL**: `http://localhost:5235/mcp/user/sse`
+    - **Protocol**: SSE (Server-Sent Events)
+  </Step>
+
+  <Step title="测试连接">
+    保存配置并测试连接是否成功
+  </Step>
+</Steps>
+
+## 支持的端点
+
+Cherry Studio 支持以下 MCP Gateway 端点：
+
+<CardGroup cols={1}>
+  <Card title="MCP 端点" icon="link">
+    - **SSE**: `http://localhost:5235/mcp/user/sse`
+    - **Streamable HTTP**: `http://localhost:5235/mcp/user/mcp`
+    - **Message**: `http://localhost:5235/mcp/user/message`
+  </Card>
+</CardGroup>
+
+## 使用示例
+
+配置完成后，您可以在 Cherry Studio 中：
+
+1. **查看可用工具**: 在界面中会显示从 MCP Gateway 获取的工具列表
+2. **执行操作**: 通过自然语言与 AI 对话，让 AI 调用相应的工具
+3. **查看结果**: 观察工具执行的结果和返回的数据
+
+## 功能特性
+
+<AccordionGroup>
+  <Accordion icon="robot" title="智能对话">
+    Cherry Studio 可以理解您的需求并自动选择合适的工具执行操作
+  </Accordion>
+
+  <Accordion icon="history" title="历史记录">
+    保存对话历史和工具执行记录，方便回顾和重复操作
+  </Accordion>
+
+  <Accordion icon="gear" title="自定义配置">
+    支持配置多个 MCP Server，管理不同的业务场景
+  </Accordion>
+</AccordionGroup>
+
+## 常见问题
+
+<AccordionGroup>
+  <Accordion icon="exclamation-triangle" title="连接问题">
+    - 确保 MCP Gateway 服务正在运行
+    - 检查网络连接和端口访问权限
+    - 验证 URL 配置格式是否正确
+  </Accordion>
+
+  <Accordion icon="tools" title="工具加载失败">
+    - 检查 MCP Server 配置是否正确
+    - 查看 Cherry Studio 的错误日志
+    - 验证 MCP Gateway 的工具配置
+  </Accordion>
+
+  <Accordion icon="performance" title="性能优化">
+    - 合理配置工具的超时时间
+    - 避免频繁的长时间操作
+    - 考虑使用批量操作减少调用次数
+  </Accordion>
+</AccordionGroup>
+
+## 高级配置
+
+### 多服务配置
+
+如果您有多个业务服务，可以在 Cherry Studio 中配置多个 MCP 连接：
+
+```
+用户服务: http://localhost:5235/mcp/user/sse
+订单服务: http://localhost:5235/mcp/order/sse
+产品服务: http://localhost:5235/mcp/product/sse
+```
+
+### 认证配置
+
+对于需要认证的服务，确保在请求头中包含必要的认证信息：
+
+- Bearer Token
+- API Key
+- Custom Headers
+
+<Note>
+具体的认证配置方式请参考 Cherry Studio 的官方文档或联系 Cherry Studio 的技术支持。
+</Note>
+
+## 更多资源
+
+<Card title="Cherry Studio 官网" icon="cherry" href="#">
+  访问 Cherry Studio 官方网站获取更多信息和帮助
+</Card>

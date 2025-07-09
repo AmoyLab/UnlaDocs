@@ -1,0 +1,234 @@
+---
+title: "API Server 配置"
+description: "apiserver.yaml 配置文件详细说明"
+---
+
+配置文件支持使用 `${VAR:default}` 语法进行环境变量注入。如果环境变量未设置，将使用默认值。
+
+常见的做法是通过不同的 `.env`、`.env.development`、`.env.prod` 进行注入，当然也可以直接修改配置写死一个值。
+
+## 日志配置
+
+日志配置用于控制应用程序的日志输出行为：
+
+```yaml
+logger:
+  level: "${APISERVER_LOGGER_LEVEL:info}"                                         # 日志级别：debug, info, warn, error
+  format: "${APISERVER_LOGGER_FORMAT:console}"                                    # 日志格式：json, console
+  output: "${APISERVER_LOGGER_OUTPUT:stdout}"                                     # 输出方式：stdout, file
+  file_path: "${APISERVER_LOGGER_FILE_PATH:/var/log/unla/apiserver.log}"          # 日志文件路径（当 output 为 file 时）
+  max_size: ${APISERVER_LOGGER_MAX_SIZE:100}                                      # 日志文件最大大小（MB）
+  max_backups: ${APISERVER_LOGGER_MAX_BACKUPS:3}                                  # 保留的备份文件数量
+  max_age: ${APISERVER_LOGGER_MAX_AGE:7}                                          # 备份文件保留天数
+  compress: ${APISERVER_LOGGER_COMPRESS:true}                                     # 是否压缩备份文件
+  color: ${APISERVER_LOGGER_COLOR:true}                                           # 控制台输出是否使用颜色
+  stacktrace: ${APISERVER_LOGGER_STACKTRACE:true}                                 # 错误日志是否包含堆栈跟踪
+```
+
+<CardGroup cols={2}>
+  <Card title="日志级别" icon="chart-line">
+    支持 debug, info, warn, error 四个级别
+  </Card>
+  <Card title="输出格式" icon="file-text">
+    支持 json 结构化输出和 console 可读格式
+  </Card>
+  <Card title="文件轮转" icon="refresh">
+    自动管理日志文件大小和数量
+  </Card>
+  <Card title="堆栈跟踪" icon="bug">
+    错误日志可包含详细的调用栈信息
+  </Card>
+</CardGroup>
+
+## 国际化配置
+
+国际化配置用于支持多语言界面：
+
+```yaml
+i18n:
+  path: "${APISERVER_I18N_PATH:/etc/unla/i18n}"                                   # 翻译文件路径
+```
+
+<Note>
+翻译文件路径应该包含各种语言的翻译文件，用于支持多语言用户界面。
+</Note>
+
+## 聊天消息数据库配置
+
+该配置主要针对后台的聊天消息存储的配置（当然这里是可以和代理配置存放在同一个数据库），主要用于存储 Web 界面中的聊天会话和消息数据。
+
+<Note>
+聊天消息数据库主要用于存储通过 Web 界面进行的 MCP 聊天记录，与网关代理配置的存储是分开的。
+</Note>
+
+### 支持的数据库
+
+目前支持 3 种数据库：
+
+<CardGroup cols={3}>
+  <Card title="SQLite3" icon="database">
+    适合开发环境和小规模部署
+  </Card>
+  <Card title="PostgreSQL" icon="elephant">
+    推荐用于生产环境
+  </Card>
+  <Card title="MySQL" icon="mysql">
+    传统关系型数据库选择
+  </Card>
+</CardGroup>
+
+### 配置示例
+
+```yaml
+database:
+  type: "${APISERVER_DB_TYPE:sqlite}"               # 数据库类型（sqlite,postgres, mysql）
+  host: "${APISERVER_DB_HOST:localhost}"            # 数据库主机地址
+  port: ${APISERVER_DB_PORT:5432}                   # 数据库端口
+  user: "${APISERVER_DB_USER:postgres}"             # 数据库用户名
+  password: "${APISERVER_DB_PASSWORD:example}"      # 数据库密码
+  dbname: "${APISERVER_DB_NAME:./unla.db}"          # 数据库名称或文件路径
+  sslmode: "${APISERVER_DB_SSL_MODE:disable}"       # 数据库连接的 SSL 模式
+```
+
+<Tip>
+若有需要增加数据库支持可以到 [Issue](https://github.com/amoylab/unla/issues) 里请求支持，或者可以直接实现对应的 impl 并提交 PR :)
+</Tip>
+
+## 网关代理存储配置
+
+这里是用来存放网关代理配置的，也就是对应的从 MCP 到 API 映射的那个配置。
+
+目前支持 2 种存储方式：
+
+<AccordionGroup>
+  <Accordion icon="folder" title="disk 存储">
+    配置会以文件的形式存放在磁盘里，每个配置单独一个文件，可以理解跟 nginx 的 vhost 一个道理，比如 `svc-a.yaml`、`svc-b.yaml`
+  </Accordion>
+  <Accordion icon="database" title="db 存储">
+    存到数据库，每个配置是一条记录。目前支持三种数据库：SQLite3、PostgreSQL、MySQL
+  </Accordion>
+</AccordionGroup>
+
+<Note>
+`revision_history_limit` 参数控制系统保留的配置版本历史数量，有助于配置变更的回滚和审计。默认保留 10 个版本。
+</Note>
+
+### 配置示例
+
+```yaml
+storage:
+  type: "${GATEWAY_STORAGE_TYPE:db}"                                      # 存储类型：db, disk
+  revision_history_limit: ${GATEWAY_STORAGE_REVISION_HISTORY_LIMIT:10}    # 保留的版本历史数量
+
+  # 数据库配置（当 type 为 'db' 时使用）
+  database:
+    type: "${GATEWAY_DB_TYPE:sqlite}"                   # 数据库类型（sqlite,postgres, mysql）
+    host: "${GATEWAY_DB_HOST:localhost}"                # 数据库主机地址
+    port: ${GATEWAY_DB_PORT:5432}                       # 数据库端口
+    user: "${GATEWAY_DB_USER:postgres}"                 # 数据库用户名
+    password: "${GATEWAY_DB_PASSWORD:example}"          # 数据库密码
+    dbname: "${GATEWAY_DB_NAME:./unla.db}"              # 数据库名称或文件路径
+    sslmode: "${GATEWAY_DB_SSL_MODE:disable}"           # 数据库连接的 SSL 模式
+
+  # 磁盘配置（当 type 为 'disk' 时使用）
+  disk:
+    path: "${GATEWAY_STORAGE_DISK_PATH:}"               # 数据文件存储路径
+```
+
+## 通知配置
+
+通知配置模块主要是用来当配置更新的时候如何让 `mcp-gateway` 感知到更新并进行热重载而无需重启服务。
+
+### 支持的通知方式
+
+<CardGroup cols={2}>
+  <Card title="signal" icon="bell">
+    通过发送操作系统信号量来通知，类似 `kill -SIGHUP <pid>` 或者 `nginx -s reload` 这种方式
+  </Card>
+  <Card title="api" icon="api">
+    通过调用一个 API 的方式通知，`mcp-gateway` 会监听一个独立的端口
+  </Card>
+  <Card title="redis" icon="database">
+    通过 redis 的发布/订阅功能通知，适合单机或集群部署时使用
+  </Card>
+  <Card title="composite" icon="puzzle-piece">
+    组合通知，通过多种方式组合，默认 `signal` 和 `api` 一定会开启
+  </Card>
+</CardGroup>
+
+### 通知角色
+
+<Steps>
+  <Step title="sender">
+    发送者，负责发送通知，`apiserver` 只能走这个模式
+  </Step>
+  <Step title="receiver">
+    接收者，负责接收通知，单机的 `mcp-gateway` 建议只走这个模式
+  </Step>
+  <Step title="both">
+    既是发送者又是接收者，集群部署的 `mcp-gateway` 可以走这个方式
+  </Step>
+</Steps>
+
+### 配置示例
+
+```yaml
+notifier:
+  role: "${APISERVER_NOTIFIER_ROLE:sender}"  # 角色：'sender'（发送者）或 'receiver'（接收者）
+  type: "${APISERVER_NOTIFIER_TYPE:signal}"  # 类型：'signal'（信号）、'api'、'redis' 或 'composite'（组合）
+
+  # 信号配置（当 type 为 'signal' 时使用）
+  signal:
+    signal: "${APISERVER_NOTIFIER_SIGNAL:SIGHUP}"                       # 要发送的信号
+    pid: "${APISERVER_NOTIFIER_SIGNAL_PID:/var/run/mcp-gateway.pid}"    # PID 文件路径
+
+  # API 配置（当 type 为 'api' 时使用）
+  api:
+    port: ${APISERVER_NOTIFIER_API_PORT:5235}                                           # API 端口
+    target_url: "${APISERVER_NOTIFIER_API_TARGET_URL:http://localhost:5235/_reload}"    # 重载端点
+
+  # Redis 配置（当 type 为 'redis' 时使用）
+  redis:
+    addr: "${APISERVER_NOTIFIER_REDIS_ADDR:localhost:6379}"                             # Redis 地址
+    password: "${APISERVER_NOTIFIER_REDIS_PASSWORD:UseStrongPasswordIsAGoodPractice}"   # Redis 密码
+    db: ${APISERVER_NOTIFIER_REDIS_DB:0}                                                # Redis 数据库编号
+    topic: "${APISERVER_NOTIFIER_REDIS_TOPIC:mcp-gateway:reload}"                       # Redis 发布/订阅主题
+```
+
+
+## 超级管理员配置
+
+超级管理员配置用于设置系统初始管理员账户，每次启动 `apiserver` 会自动检测是否存在，若不存在会自动创建。
+
+```yaml
+super_admin:
+  username: "${SUPER_ADMIN_USERNAME:admin}"     # 超级管理员用户名
+  password: "${SUPER_ADMIN_PASSWORD:admin}"     # 超级管理员密码（生产环境请修改）
+```
+
+<Warning>
+**强烈建议生产环境或者公网环境使用强密码！**
+</Warning>
+
+## JWT 配置
+
+JWT 配置用于设置 web 认证相关的参数：
+
+```yaml
+jwt:
+  secret_key: "${APISERVER_JWT_SECRET_KEY:Pls-Change-Me!}"  # JWT密钥（生产环境请修改）
+  duration: "${APISERVER_JWT_DURATION:24h}"                # Token有效期
+```
+
+<Warning>
+**强烈建议生产环境或者公网环境使用强密码！**
+</Warning>
+
+## 配置文件位置
+
+默认情况下，配置文件应放置在以下位置：
+
+- 容器部署：`/app/configs/apiserver.yaml`
+- 二进制部署：`./configs/apiserver.yaml`
+
+您可以通过环境变量或命令行参数指定自定义的配置文件路径。
