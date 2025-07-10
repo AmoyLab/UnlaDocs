@@ -41,63 +41,16 @@ description: "🚀 将您现有的 MCP 服务和 API 通过配置转换为 MCP �
 
 ## 架构
 
-```mermaid
-flowchart TD
- subgraph BACKEND["外部服务"]
-        C1["APIs(HTTP)"]
-        C2["MCP Servers"]
-  end
- subgraph WEB["配置管理"]
-        W["Web Admin"]
-        D["apiserver"]
-  end
- subgraph GATEWAY["网关"]
-        B["MCP Gateway"]
-  end
- subgraph DATABASE["数据库"]
-        E["DB / Disk"]
-  end
-
- subgraph Notifier["配置更新通知"]
-        F["OS Signal / API / Redis"]
-  end
- subgraph UNLA["Unla"]
-        WEB
-        GATEWAY
-        DATABASE
-        Notifier
-  end
- subgraph CLIENT["客户端"]
-        A["Client (支持 MCP 协议): Claude Code / Cursor / Cline / Cherry Studio / DeepChat / LobeChat ..."]
-  end
-
-    B --> C1 & C2
-    A --> B
-    W -- 配置管理 --> D
-    D -- 读写配置 --> E
-    E -- 同步配置 --> B
-    D --> F --> B
-
-    C1:::api
-    C2:::api
-    W:::web
-    D:::web
-    B:::gateway
-    E:::db
-    A:::client
-    F:::db
-
-    class CLIENT,UNLA,BACKEND default
-    class WEB,Notifier,DATABASE,GATEWAY block
-
-    classDef client fill:#e0f7fa,stroke:#00acc1,stroke-width:2,font-weight:bold,color:#004d40
-    classDef gateway fill:#fff8e1,stroke:#ffb300,stroke-width:2,font-weight:bold,color:#5d4037
-    classDef api fill:#e8f5e9,stroke:#66bb6a,stroke-width:2,font-weight:bold,color:#1b5e20
-    classDef db fill:#fce4ec,stroke:#f06292,stroke-width:2,font-weight:bold,color:#880e4f
-    classDef web fill:#ede7f6,stroke:#7e57c2,stroke-width:2,font-weight:bold,color:#311b92
-    classDef default fill:#ffffff,stroke:#ccc,stroke-width:1,color:#000000
-    classDef block fill:#fdfdfd,stroke:#ccc,stroke-width:1,color:#000000
-```
+<img
+  className="block dark:hidden"
+  src="/images/architecture.light.svg"
+  alt="Unla Architecture Light"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/architecture.dark.svg"
+  alt="Unla Architecture Hero Dark"
+/>
 
 ## 🚀 核心功能
 
