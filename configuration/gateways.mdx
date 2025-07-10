@@ -14,7 +14,7 @@ tenant: "default"                # 租户标识，用于多租户场景
 # 路由配置
 routers:
   - server: "mock-server"       # 服务名称
-    prefix: "/mcp/user"         # 路由前缀，全局唯一，不可重复，建议按照服务或者领域+模块来区分前缀
+    prefix: "/gateway/user"         # 路由前缀，全局唯一，不可重复，建议按照服务或者领域+模块来区分前缀
 
     # CORS 配置
     cors:
@@ -255,13 +255,13 @@ tools:
 ```yaml
 routers:
   - server: "mock-server"       # 服务名称，需要与servers中的name保持一致
-    prefix: "/mcp/user"         # 路由前缀，全局唯一，不可重复
+    prefix: "/gateway/user"         # 路由前缀，全局唯一，不可重复
 ```
 
 目前默认情况下会在`prefix`的基础之上衍生出3个接入点：
-- SSE: `${prefix}/sse`，如：`/mcp/user/sse`
-- SSE: `${prefix}/message`，如：`/mcp/user/message`
-- StreamableHTTP: `${prefix}/mcp`，如：`/mcp/user/mcp`
+- SSE: `${prefix}/sse`，如：`/gateway/user/sse`
+- SSE: `${prefix}/message`，如：`/gateway/user/message`
+- StreamableHTTP: `${prefix}/mcp`，如：`/gateway/user/mcp`
 
 ### 3. CORS配置
 
@@ -417,7 +417,7 @@ tenant: "default"
 
 routers:
   - server: "amap-maps"
-    prefix: "/mcp/stdio-proxy"
+    prefix: "/gateway/stdio-proxy"
     cors:
       allowOrigins:
         - "*"
@@ -433,7 +433,7 @@ routers:
         - "Mcp-Session-Id"
       allowCredentials: true
   - server: "mock-user-sse"
-    prefix: "/mcp/sse-proxy"
+    prefix: "/gateway/sse-proxy"
     cors:
       allowOrigins:
         - "*"
@@ -449,7 +449,7 @@ routers:
         - "Mcp-Session-Id"
       allowCredentials: true
   - server: "mock-user-mcp"
-    prefix: "/mcp/streamable-http-proxy"
+    prefix: "/gateway/streamable-http-proxy"
     cors:
       allowOrigins:
         - "*"
@@ -477,11 +477,11 @@ mcpServers:
 
   - type: "sse"
     name: "mock-user-sse"
-    url: "http://localhost:3000/mcp/user/sse"
+    url: "http://localhost:3000/gateway/user/sse"
 
   - type: "streamable-http"
     name: "mock-user-mcp"
-    url: "http://localhost:3000/mcp/user/mcp"
+    url: "http://localhost:3000/gateway/user/mcp"
 ```
 
 ### 配置说明
@@ -535,8 +535,8 @@ SSE 类型的 MCP 服务配置示例：
 ```yaml
 mcpServers:
   - type: "sse"
-    name: "mock-user-sse"                       # 服务名称
-    url: "http://localhost:3000/mcp/user/sse"   # 上游 SSE 服务地址，通常以/sse结尾，实际根据上游服务而定
+    name: "mock-user-sse"                           # 服务名称
+    url: "http://localhost:3000/gateway/user/sse"   # 上游 SSE 服务地址，通常以/sse结尾，实际根据上游服务而定
 ```
 
 #### 4. streamable-http 类型配置
@@ -546,8 +546,8 @@ streamable-http 类型的 MCP 服务配置示例：
 ```yaml
 mcpServers:
   - type: "streamable-http"
-    name: "mock-user-mcp"                       # 服务名称
-    url: "http://localhost:3000/mcp/user/mcp"   # 上游 MCP 服务地址，通常以/mcp结尾，实际根据上游服务而定
+    name: "mock-user-mcp"                           # 服务名称
+    url: "http://localhost:3000/gateway/user/mcp"   # 上游 MCP 服务地址，通常以/mcp结尾，实际根据上游服务而定
 ```
 
 #### 5. 路由配置
@@ -556,8 +556,8 @@ mcpServers:
 
 ```yaml
 routers:
-  - server: "amap-maps"           # 服务名称，需要与 mcpServers 中的 name 保持一致
-    prefix: "/mcp/stdio-proxy"    # 路由前缀，全局唯一
+  - server: "amap-maps"               # 服务名称，需要与 mcpServers 中的 name 保持一致
+    prefix: "/gateway/stdio-proxy"    # 路由前缀，全局唯一
     cors:
       allowOrigins:
         - "*"

@@ -18,7 +18,7 @@ Cherry Studio 是另一个支持 MCP (Model Context Protocol) 的 AI 客户端�
 
   <Step title="配置 MCP 连接">
     添加 MCP Gateway 的连接信息：
-    - **Server URL**: `http://localhost:5235/mcp/user/sse`
+    - **Server URL**: `http://localhost:5235/gateway/user/sse`
     - **Protocol**: SSE (Server-Sent Events)
   </Step>
 
@@ -33,9 +33,9 @@ Cherry Studio 支持以下 MCP Gateway 端点：
 
 <CardGroup cols={1}>
   <Card title="MCP 端点" icon="link">
-    - **SSE**: `http://localhost:5235/mcp/user/sse`
-    - **Streamable HTTP**: `http://localhost:5235/mcp/user/mcp`
-    - **Message**: `http://localhost:5235/mcp/user/message`
+    - **SSE**: `http://localhost:5235/gateway/user/sse`
+    - **Streamable HTTP**: `http://localhost:5235/gateway/user/mcp`
+    - **Message**: `http://localhost:5235/gateway/user/message`
   </Card>
 </CardGroup>
 
@@ -92,9 +92,9 @@ Cherry Studio 支持以下 MCP Gateway 端点：
 如果您有多个业务服务，可以在 Cherry Studio 中配置多个 MCP 连接：
 
 ```
-用户服务: http://localhost:5235/mcp/user/sse
-订单服务: http://localhost:5235/mcp/order/sse
-产品服务: http://localhost:5235/mcp/product/sse
+用户服务: http://localhost:5235/gateway/user/sse
+订单服务: http://localhost:5235/gateway/order/sse
+产品服务: http://localhost:5235/gateway/product/sse
 ```
 
 ### 认证配置
