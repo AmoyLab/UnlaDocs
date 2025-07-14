@@ -1,0 +1,138 @@
+---
+title: "Binary Deployment"
+description: "Deploy MCP Gateway using binary files"
+---
+
+## Supported Platforms
+
+Currently supports binary deployment for the following platforms:
+
+<CardGroup cols={2}>
+  <Card title="Linux AMD64" icon="linux">
+    Suitable for x86_64 architecture Linux systems
+  </Card>
+  <Card title="Linux ARM64" icon="linux">
+    Suitable for ARM64 architecture Linux systems
+  </Card>
+</CardGroup>
+
+You can view and download the latest binary files at [GitHub Releases](https://github.com/amoylab/unla/releases).
+
+## Deployment Steps
+
+<Steps>
+  <Step title="Create Directory and Download Configuration">
+    ```bash
+    mkdir -p unla/{configs,data}
+    cd unla/
+    curl -sL https://raw.githubusercontent.com/amoylab/unla/refs/heads/main/configs/apiserver.yaml -o configs/apiserver.yaml
+    curl -sL https://raw.githubusercontent.com/amoylab/unla/refs/heads/main/configs/mcp-gateway.yaml -o configs/mcp-gateway.yaml
+    curl -sL https://raw.githubusercontent.com/amoylab/unla/refs/heads/main/.env.example -o .env
+    ```
+  </Step>
+
+  <Step title="Adjust PID File Path (macOS Users)">
+    <Note>
+    On macOS, `/var/run/mcp-gateway.pid` may not have write permissions, so the path needs to be adjusted.
+    </Note>
+
+    ```bash
+    sed -i 's|/var/run/mcp-gateway.pid|./data/mcp-gateway.pid|g' .env
+    ```
+  </Step>
+
+  <Step title="Download Binary Files">
+    Choose the appropriate binary file based on your system architecture:
+
+    **Linux AMD64:**
+    ```bash
+    LATEST_VERSION=$(curl -s https://api.github.com/repos/amoylab/unla/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    curl -sL "https://github.com/amoylab/unla/releases/download/${LATEST_VERSION}/mcp-gateway-linux-amd64" -o mcp-gateway
+    chmod +x mcp-gateway
+    ```
+
+    **Linux ARM64:**
+    ```bash
+    LATEST_VERSION=$(curl -s https://api.github.com/repos/amoylab/unla/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    curl -sL "https://github.com/amoylab/unla/releases/download/${LATEST_VERSION}/mcp-gateway-linux-arm64" -o mcp-gateway
+    chmod +x mcp-gateway
+    ```
+  </Step>
+
+  <Step title="Start Service">
+    ```bash
+    ./mcp-gateway
+    ```
+  </Step>
+</Steps>
+
+## 配置说明
+
+### 环境变量文件
+
+下载的 `.env` 文件包含了所有必要的配置项。主要配置包括：
+
+<AccordionGroup>
+  <Accordion icon="database" title="数据库配置">
+    配置用于存储聊天消息和网关配置的数据库连接信息
+  </Accordion>
+  <Accordion icon="bell" title="通知配置">
+    配置用于配置更新通知的方式（signal、api、redis 等）
+  </Accordion>
+  <Accordion icon="key" title="认证配置">
+    配置 JWT 密钥和超级管理员账户信息
+  </Accordion>
+</AccordionGroup>
+
+### Configuration Files
+
+- `configs/apiserver.yaml`: API server configuration
+- `configs/mcp-gateway.yaml`: MCP Gateway core configuration
+
+For detailed configuration instructions, please refer to the [Configuration Documentation](/en/configuration/apiserver).
+
+## Notes
+
+<Warning>
+Binary deployment requires you to manage service startup, stop, and monitoring yourself. It is recommended to use process management tools such as systemd or supervisor in production environments.
+</Warning>
+
+### systemd Service Configuration Example
+
+You can create a systemd service file to manage MCP Gateway:
+
+```ini
+[Unit]
+Description=MCP Gateway
+After=network.target
+
+[Service]
+Type=simple
+User=mcpgateway
+WorkingDirectory=/opt/unla
+ExecStart=/opt/unla/mcp-gateway
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Save this file as `/etc/systemd/system/mcp-gateway.service`, then:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable mcp-gateway
+sudo systemctl start mcp-gateway
+```
+
+### Firewall Configuration
+
+Ensure the following ports are accessible:
+
+- `5235`: MCP Gateway main service port
+- `5335`: Management port (internal access only)
+
+<Tip>
+If you need a Web management interface, it is recommended to deploy API Server and Web frontend simultaneously, or use the [All-in-One Docker deployment](/en/deployment/docker#all-in-one-deployment) method.
+</Tip>

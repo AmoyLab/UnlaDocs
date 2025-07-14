@@ -1,0 +1,179 @@
+---
+title: "System Architecture"
+description: "Overall architecture design and module description of MCP Gateway system"
+---
+
+Overview of the overall architecture of MCP Gateway system, including the gateway itself, management backend, supporting APIs, storage mechanisms, and integration methods with external services.
+
+## Architecture Diagram
+
+<Warning>
+The architecture diagram is being updated and will provide detailed system architecture diagrams in future versions.
+</Warning>
+
+## Core Modules
+
+### MCP Gateway (mcp-gateway)
+
+MCP Gateway is the core component of the system, responsible for handling all MCP protocol requests:
+
+<CardGroup cols={2}>
+  <Card title="Request Processing" icon="globe">
+    - **Unified Entry**: `/*` listens to all HTTP requests
+    - **Route Distribution**: Dynamic request distribution based on route prefix
+  </Card>
+  <Card title="Protocol Conversion" icon="arrows-spin">
+    - **Protocol Parsing**: Parse JSON-RPC format requests
+    - **Tool Distribution**: Parse tool names and construct call parameters
+  </Card>
+</CardGroup>
+
+#### Main Functions
+
+<Steps>
+  <Step title="Request Routing">
+    Request distribution based on route prefix and suffix (`/sse`, `/message`, `/mcp`)
+  </Step>
+  <Step title="Protocol Parsing">
+    Parse JSON-RPC format to extract methods and parameters
+  </Step>
+  <Step title="Service Invocation">
+    Invoke external services and parse results
+  </Step>
+  <Step title="Configuration Reading">
+    Dynamically load and apply configuration information
+  </Step>
+</Steps>
+
+### Management Backend (web)
+
+Provides a visual management interface with the following core modules:
+
+<AccordionGroup>
+  <Accordion icon="gear" title="Proxy Configuration Module">
+    Used to configure MCP gateway proxies and tools, supporting graphical configuration interface
+  </Accordion>
+  <Accordion icon="comments" title="Conversation Experiment Platform">
+    Simple Chat for testing MCP, mainly provided for developers and users who need to integrate into custom systems for reference
+  </Accordion>
+  <Accordion icon="users" title="User Management Module">
+    User permissions, information maintenance, and access control
+  </Accordion>
+</AccordionGroup>
+
+### Management Backend Service (apiserver)
+
+Provides complete backend API services:
+
+<CardGroup cols={2}>
+  <Card title="API Services" icon="server">
+    - Configuration management API
+    - User interface management
+    - Chat history queries
+  </Card>
+  <Card title="Configuration Management" icon="database">
+    - Configuration write storage
+    - Hot update notifications
+    - Permission control
+  </Card>
+</CardGroup>
+
+### Storage System
+
+#### Configuration Storage
+
+Stores all MCP services, tools, routing and other configuration information:
+
+<CardGroup cols={3}>
+  <Card title="Disk Storage" icon="folder">
+    YAML file format, suitable for development environments
+  </Card>
+  <Card title="SQLite" icon="database">
+    Lightweight database, suitable for single-machine deployment
+  </Card>
+  <Card title="PostgreSQL/MySQL" icon="server">
+    Enterprise-grade database, suitable for production environments
+  </Card>
+</CardGroup>
+
+#### Web Data Storage
+
+Stores user data, session records, etc.:
+
+- User account information
+- Chat session history
+- System configuration data
+- Operation log records
+
+### External Service Integration
+
+MCP Gateway is designed for seamless integration with existing business systems:
+
+<AccordionGroup>
+  <Accordion icon="api" title="REST API Services">
+    Supports standard REST API calls, including GET, POST, PUT, DELETE and other methods
+  </Accordion>
+  <Accordion icon="webhook" title="Webhook Services">
+    Supports Webhook callbacks and event trigger mechanisms
+  </Accordion>
+  <Accordion icon="database" title="Database Services">
+    Can directly integrate with existing database systems, supporting multiple database types
+  </Accordion>
+</AccordionGroup>
+
+## Data Flow
+
+<Steps>
+  <Step title="Request Reception">
+    MCP Client sends requests to specified endpoints of MCP Gateway
+  </Step>
+  <Step title="Protocol Parsing">
+    Gateway parses MCP protocol format and extracts tool invocation information
+  </Step>
+  <Step title="Configuration Lookup">
+    Look up corresponding configuration information based on tool name
+  </Step>
+  <Step title="Service Invocation">
+    Call backend services using configured templates and parameters
+  </Step>
+  <Step title="Response Processing">
+    Process backend service responses and convert to MCP protocol format
+  </Step>
+  <Step title="Result Return">
+    Return processing results to MCP Client
+  </Step>
+</Steps>
+
+## Deployment Architecture
+
+### Single Machine Deployment
+
+<CardGroup cols={1}>
+  <Card title="All-in-One Deployment" icon="box">
+    All services run on the same machine, suitable for development and testing environments
+  </Card>
+</CardGroup>
+
+### Distributed Deployment
+
+<CardGroup cols={2}>
+  <Card title="Microservice Architecture" icon="cubes">
+    Each component is deployed independently, supporting horizontal scaling and load balancing
+  </Card>
+  <Card title="Containerized Deployment" icon="docker">
+    Use Docker and Kubernetes for containerized deployment
+  </Card>
+</CardGroup>
+
+## Extensibility Design
+
+MCP Gateway adopts a modular design and supports the following extensions:
+
+- **Protocol Extensions**: Support for new MCP protocol versions
+- **Storage Extensions**: Support for new storage backends
+- **Authentication Extensions**: Support for multiple authentication mechanisms
+- **Monitoring Extensions**: Integration with various monitoring and logging systems
+
+<Tip>
+To deeply understand the specific implementation of each component, please refer to the corresponding configuration documentation and development guides.
+</Tip>

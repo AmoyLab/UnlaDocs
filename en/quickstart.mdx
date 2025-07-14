@@ -1,0 +1,143 @@
+---
+title: "Quick Start"
+description: "Complete deployment and configuration guide for Unla (MCP Gateway)"
+---
+
+## One-Click MCP Gateway Launch
+
+> All service configuration parameters can be changed through environment variable injection
+
+Please note that the following environment variables need to be modified (other environment variables should be adjusted according to your actual situation):
+
+```bash
+export APISERVER_JWT_SECRET_KEY="changeme-please-generate-a-random-secret"
+export SUPER_ADMIN_USERNAME="admin"
+export SUPER_ADMIN_PASSWORD="changeme-please-use-a-secure-password"
+```
+
+## GHCR Image
+
+Using GitHub Container Registry image:
+
+```bash
+docker run -d \
+  --name unla \
+  -p 8080:80 \
+  -p 5234:5234 \
+  -p 5235:5235 \
+  -p 5335:5335 \
+  -p 5236:5236 \
+  -e ENV=production \
+  -e TZ=Asia/Shanghai \
+  -e APISERVER_JWT_SECRET_KEY=${APISERVER_JWT_SECRET_KEY} \
+  -e SUPER_ADMIN_USERNAME=${SUPER_ADMIN_USERNAME} \
+  -e SUPER_ADMIN_PASSWORD=${SUPER_ADMIN_PASSWORD} \
+  --restart unless-stopped \
+  ghcr.io/amoylab/unla/allinone:latest
+```
+
+## Aliyun Image
+
+Devices in China can pull images from Alibaba Cloud registry:
+
+```bash
+export APISERVER_JWT_SECRET_KEY="changeme-please-generate-a-random-secret"
+export SUPER_ADMIN_USERNAME="admin"
+export SUPER_ADMIN_PASSWORD="changeme-please-use-a-secure-password"
+```
+
+Start using Aliyun image:
+
+```bash
+docker run -d \
+  --name unla \
+  -p 8080:80 \
+  -p 5234:5234 \
+  -p 5235:5235 \
+  -p 5335:5335 \
+  -p 5236:5236 \
+  -e ENV=production \
+  -e TZ=Asia/Shanghai \
+  -e APISERVER_JWT_SECRET_KEY=${APISERVER_JWT_SECRET_KEY} \
+  -e SUPER_ADMIN_USERNAME=${SUPER_ADMIN_USERNAME} \
+  -e SUPER_ADMIN_PASSWORD=${SUPER_ADMIN_PASSWORD} \
+  --restart unless-stopped \
+  registry.ap-southeast-1.aliyuncs.com/amoylab/unla-allinone:latest
+```
+
+## Access and Configuration
+
+<Steps>
+  <Step title="Access Web Interface">
+    Open http://localhost:8080/ in your browser and log in with the configured admin credentials
+  </Step>
+  <Step title="Add MCP Server">
+    1. Copy the configuration file: https://github.com/AmoyLab/Unla/blob/main/configs/proxy-mock-server.yaml
+    2. Click "Add MCP Server" in the web interface
+    3. Paste the configuration and save
+  </Step>
+</Steps>
+
+## Available Endpoints
+
+After configuration, the service will be available at the following endpoints:
+
+<CardGroup cols={1}>
+  <Card title="MCP Endpoints" icon="link">
+    - **MCP SSE**: `http://localhost:5235/gateway/user/sse`
+    - **MCP SSE Message**: `http://localhost:5235/gateway/user/message`
+    - **MCP Streamable HTTP**: `http://localhost:5235/gateway/user/mcp`
+  </Card>
+</CardGroup>
+
+Configure URLs with `/sse` or `/mcp` suffix in your MCP Client to start using the service.
+
+## Testing
+
+You can test the service in two ways:
+
+<CardGroup cols={2}>
+  <Card title="Web Interface Testing" icon="globe">
+    Use the MCP Chat page in the web interface for testing
+  </Card>
+  <Card title="MCP Client Testing" icon="terminal">
+    Use your own MCP Client (**Recommended**)
+  </Card>
+</CardGroup>
+
+## Advanced Configuration (Optional)
+
+If you need more granular configuration control, you can start with mounted configuration files:
+
+<Steps>
+  <Step title="Create Directory and Download Configuration">
+    ```bash
+    mkdir -p unla/{configs,data}
+    cd unla/
+    curl -sL https://raw.githubusercontent.com/amoylab/unla/refs/heads/main/configs/apiserver.yaml -o configs/apiserver.yaml
+    curl -sL https://raw.githubusercontent.com/amoylab/unla/refs/heads/main/configs/mcp-gateway.yaml -o configs/mcp-gateway.yaml
+    curl -sL https://raw.githubusercontent.com/amoylab/unla/refs/heads/main/.env.example -o .env.allinone
+    ```
+  </Step>
+  <Step title="Start with Configuration Files">
+    ```bash
+    docker run -d \
+               --name unla \
+               -p 8080:80 \
+               -p 5234:5234 \
+               -p 5235:5235 \
+               -p 5335:5335 \
+               -p 5236:5236 \
+               -e ENV=production \
+               -v $(pwd)/configs:/app/configs \
+               -v $(pwd)/data:/app/data \
+               -v $(pwd)/.env.allinone:/app/.env \
+               --restart unless-stopped \
+               ghcr.io/amoylab/unla/allinone:latest
+    ```
+  </Step>
+</Steps>
+
+<Tip>
+By mounting configuration files, you can more precisely control the configuration parameters of each service. For detailed configuration instructions, please refer to the [Configuration Documentation](/en/configuration/apiserver).
+</Tip>

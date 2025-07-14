@@ -1,0 +1,116 @@
+---
+title: "Cherry Studio Configuration Guide"
+description: "How to configure MCP Gateway in Cherry Studio"
+---
+
+Cherry Studio is another AI client tool that supports MCP (Model Context Protocol). This document describes how to configure MCP Gateway in Cherry Studio.
+
+## Configuration Steps
+
+<Steps>
+  <Step title="Open Cherry Studio">
+    Launch the Cherry Studio application
+  </Step>
+
+  <Step title="Access Settings">
+    Find settings or configuration options in Cherry Studio
+  </Step>
+
+  <Step title="Configure MCP Connection">
+    Add MCP Gateway connection information:
+    - **Server URL**: `http://localhost:5235/gateway/user/sse`
+    - **Protocol**: SSE (Server-Sent Events)
+  </Step>
+
+  <Step title="Test Connection">
+    Save configuration and test if the connection is successful
+  </Step>
+</Steps>
+
+## Supported Endpoints
+
+Cherry Studio supports the following MCP Gateway endpoints:
+
+<CardGroup cols={1}>
+  <Card title="MCP Endpoints" icon="link">
+    - **SSE**: `http://localhost:5235/gateway/user/sse`
+    - **Streamable HTTP**: `http://localhost:5235/gateway/user/mcp`
+    - **Message**: `http://localhost:5235/gateway/user/message`
+  </Card>
+</CardGroup>
+
+## Usage Example
+
+After configuration is complete, you can do the following in Cherry Studio:
+
+1. **View Available Tools**: The interface will display the tool list retrieved from MCP Gateway
+2. **Execute Operations**: Communicate with AI through natural language and let AI call corresponding tools
+3. **View Results**: Observe the results of tool execution and returned data
+
+## Features
+
+<AccordionGroup>
+  <Accordion icon="robot" title="Smart Conversation">
+    Cherry Studio can understand your needs and automatically select appropriate tools to execute operations
+  </Accordion>
+
+  <Accordion icon="history" title="History Records">
+    Save conversation history and tool execution records for easy review and repeated operations
+  </Accordion>
+
+  <Accordion icon="gear" title="Custom Configuration">
+    Support configuring multiple MCP Servers to manage different business scenarios
+  </Accordion>
+</AccordionGroup>
+
+## Common Issues
+
+<AccordionGroup>
+  <Accordion icon="exclamation-triangle" title="Connection Issues">
+    - Ensure MCP Gateway service is running
+    - Check network connection and port access permissions
+    - Verify URL configuration format is correct
+  </Accordion>
+
+  <Accordion icon="tools" title="Tool Loading Failed">
+    - Check if MCP Server configuration is correct
+    - Check Cherry Studio's error logs
+    - Verify MCP Gateway's tool configuration
+  </Accordion>
+
+  <Accordion icon="performance" title="Performance Optimization">
+    - Reasonably configure tool timeout settings
+    - Avoid frequent long-duration operations
+    - Consider using batch operations to reduce call frequency
+  </Accordion>
+</AccordionGroup>
+
+## Advanced Configuration
+
+### Multi-Service Configuration
+
+If you have multiple business services, you can configure multiple MCP connections in Cherry Studio:
+
+```
+User Service: http://localhost:5235/gateway/user/sse
+Order Service: http://localhost:5235/gateway/order/sse
+Product Service: http://localhost:5235/gateway/product/sse
+```
+
+### Authentication Configuration
+
+For services that require authentication, ensure necessary authentication information is included in request headers:
+
+- Bearer Token
+- API Key
+- Custom Headers
+
+<Note>
+For specific authentication configuration methods, please refer to Cherry Studio's official documentation or contact Cherry Studio's technical support.
+</Note>
+
+## More Resources
+
+<Card title="Cherry Studio Official Website" icon="cherry" href="#">
+  Visit Cherry Studio's official website for more information and help
+</Card>

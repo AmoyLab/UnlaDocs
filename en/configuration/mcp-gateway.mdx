@@ -1,0 +1,185 @@
+---
+title: "MCP Gateway Configuration"
+description: "Detailed explanation of mcp-gateway.yaml configuration file"
+---
+
+Configuration files support using `${VAR:default}` syntax for environment variable injection. If environment variables are not set, default values will be used.
+
+A common practice is to inject through different `.env`, `.env.development`, `.env.prod` files, though you can also directly modify the configuration to hardcode a value.
+
+## Basic Configuration
+
+```yaml
+port: ${MCP_GATEWAY_PORT:5235}                      # 服务监听端口
+pid: "${MCP_GATEWAY_PID:/var/run/mcp-gateway.pid}"  # PID文件路径
+```
+
+<Note>
+The PID here should be consistent with the PIDs mentioned below, used for service management and hot reload functionality.
+</Note>
+
+## Storage Configuration
+
+The storage configuration module is mainly used to store gateway proxy configuration information. Currently supports two storage methods:
+
+<CardGroup cols={2}>
+  <Card title="disk storage" icon="folder">
+    Configurations are stored as files on disk, with each configuration as a separate file, similar to nginx vhost
+  </Card>
+  <Card title="db storage" icon="database">
+    Store in database, each configuration is a record, supports SQLite3, PostgreSQL, MySQL
+  </Card>
+</CardGroup>
+
+### Configuration Example
+
+```yaml
+storage:
+  type: "${GATEWAY_STORAGE_TYPE:db}"                    # Storage type: db, disk
+
+  # Database configuration (used when type is 'db')
+  database:
+    type: "${GATEWAY_DB_TYPE:sqlite}"                   # Database type (sqlite, postgres, mysql)
+    host: "${GATEWAY_DB_HOST:localhost}"                # Database host address
+    port: ${GATEWAY_DB_PORT:5432}                       # Database port
+    user: "${GATEWAY_DB_USER:postgres}"                 # Database username
+    password: "${GATEWAY_DB_PASSWORD:example}"          # Database password
+    dbname: "${GATEWAY_DB_NAME:./data/mcp-gateway.db}"  # Database name or file path
+    sslmode: "${GATEWAY_DB_SSL_MODE:disable}"           # SSL mode for database connection
+
+  # Disk configuration (used when type is 'disk')
+  disk:
+    path: "${GATEWAY_STORAGE_DISK_PATH:}"               # Data file storage path
+```
+
+## Notification Configuration
+
+The notification configuration module is mainly used to let `mcp-gateway` detect updates and perform hot reloads without restarting the service when configuration updates occur.
+
+### Supported Notification Methods
+
+<CardGroup cols={2}>
+  <Card title="signal" icon="bell">
+    Notify by sending operating system signals, similar to `kill -SIGHUP <pid>` or `nginx -s reload`
+  </Card>
+  <Card title="api" icon="webhook">
+    Notify by calling an API, `mcp-gateway` will listen on an independent port
+  </Card>
+  <Card title="redis" icon="database">
+    Notify through redis publish/subscribe functionality, suitable for single machine or cluster deployment
+  </Card>
+  <Card title="composite" icon="puzzle-piece">
+    Composite notification, combining multiple methods, `signal` and `api` are always enabled by default
+  </Card>
+</CardGroup>
+
+### Notification Role Description
+
+<AccordionGroup>
+  <Accordion icon="paper-plane" title="sender">
+    Responsible for sending notifications, `apiserver` can only use this mode
+  </Accordion>
+  <Accordion icon="inbox" title="receiver">
+    Responsible for receiving notifications, standalone `mcp-gateway` is recommended to use only this mode
+  </Accordion>
+  <Accordion icon="arrows-repeat" title="both">
+    Both sender and receiver, cluster deployed `mcp-gateway` can use this approach
+  </Accordion>
+</AccordionGroup>
+
+### Configuration Example
+
+```yaml
+notifier:
+  role: "${NOTIFIER_ROLE:receiver}" # Role: 'sender' or 'receiver'
+  type: "${NOTIFIER_TYPE:signal}"   # Type: 'signal', 'api', 'redis' or 'composite'
+
+  # Signal configuration (used when type is 'signal')
+  signal:
+    signal: "${NOTIFIER_SIGNAL:SIGHUP}"                     # Signal to send
+    pid: "${NOTIFIER_SIGNAL_PID:/var/run/mcp-gateway.pid}"  # PID file path
+
+  # API configuration (used when type is 'api')
+  api:
+    port: ${NOTIFIER_API_PORT:5235}                                         # API port
+    target_url: "${NOTIFIER_API_TARGET_URL:http://localhost:5235/_reload}"  # Reload endpoint
+
+  # Redis configuration (used when type is 'redis')
+  redis:
+    addr: "${NOTIFIER_REDIS_ADDR:localhost:6379}"                               # Redis address
+    password: "${NOTIFIER_REDIS_PASSWORD:UseStrongPasswordIsAGoodPractice}"     # Redis password
+    db: ${NOTIFIER_REDIS_DB:0}                                                  # Redis database number
+    topic: "${NOTIFIER_REDIS_TOPIC:mcp-gateway:reload}"                         # Redis publish/subscribe topic
+```
+
+## Session Storage Configuration
+
+Session storage configuration is used to store session information in MCP. Different storage methods can be chosen based on different deployment scenarios:
+
+<CardGroup cols={2}>
+  <Card title="memory storage" icon="brain">
+    Memory storage, suitable for single machine deployment (note: restart will lose session information)
+  </Card>
+  <Card title="redis storage" icon="database">
+    Redis storage, suitable for single machine or cluster deployment, supports persistence
+  </Card>
+</CardGroup>
+
+### Configuration Example
+
+```yaml
+session:
+  type: "${SESSION_STORAGE_TYPE:memory}"                    # Storage type: memory, redis
+  redis:
+    addr: "${SESSION_REDIS_ADDR:localhost:6379}"            # Redis address
+    password: "${SESSION_REDIS_PASSWORD:}"                  # Redis password
+    db: ${SESSION_REDIS_DB:0}                               # Redis database number
+    topic: "${SESSION_REDIS_TOPIC:mcp-gateway:session}"     # Redis publish/subscribe topic
+```
+
+<Warning>
+When using memory storage, service restart will cause all session information to be lost. Redis storage is recommended for production environments.
+</Warning>
+
+## Configuration File Location
+
+By default, configuration files should be placed in the following locations:
+
+- Container deployment: `/app/configs/mcp-gateway.yaml`
+- Binary deployment: `./configs/mcp-gateway.yaml`
+
+## Hot Reload Mechanism
+
+MCP Gateway supports hot reload configuration, allowing new configurations to be applied without restarting the service:
+
+<Steps>
+  <Step title="Configuration Update Detection">
+    When configuration changes occur, reload is triggered through configured notification methods (signal, api, redis)
+  </Step>
+  <Step title="Configuration Validation">
+    Before reloading, the validity of the new configuration is verified to ensure stable service operation
+  </Step>
+  <Step title="Smooth Transition">
+    After validation passes, smoothly switch to the new configuration without interrupting ongoing connections
+  </Step>
+</Steps>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion icon="gear" title="Single Machine Deployment">
+    - Recommended storage type: `db` with SQLite
+    - Notification type: `composite` or `signal`
+    - Session storage: `memory` or `redis`
+  </Accordion>
+  <Accordion icon="cubes" title="Cluster Deployment">
+    - Storage type: `db` with PostgreSQL or MySQL
+    - Notification type: `redis` or `composite`
+    - Session storage: recommended `redis`
+  </Accordion>
+  <Accordion icon="shield-check" title="Production Environment">
+    - Use strong passwords to protect Redis and database
+    - Regularly backup configuration data
+    - Monitor service health status and performance metrics
+  </Accordion>
+</AccordionGroup>

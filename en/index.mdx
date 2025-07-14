@@ -1,0 +1,140 @@
+---
+title: "Unla - MCP Gateway"
+description: "🚀 Transform your existing MCP services and APIs into MCP-compliant services through configuration — no code changes required"
+---
+
+<img
+  className="block dark:hidden"
+  src="/images/Old War Office Building(Urban Architecture),[Leo].20230108.png"
+  alt="MCP Gateway Hero Light"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/Couple in Thames(Lover),[Leo].20231003.png"
+  alt="MCP Gateway Hero Dark"
+/>
+
+## What is Unla?
+
+**Unla** is a lightweight, highly available gateway service written in Go. It enables individuals and organizations to transform existing MCP services and APIs into [MCP protocol](https://modelcontextprotocol.io/) compliant services through configuration — without changing a single line of code.
+
+<Note>
+⚡ **Note**: Unla is under rapid development! We strive to maintain backward compatibility, but cannot guarantee 100%. Please carefully check version changes when upgrading. Due to rapid iteration, documentation updates may sometimes lag behind. If you encounter any issues, feel free to seek help through [Discord](https://discord.gg/udf69cT9TY) or [Issues](https://github.com/amoylab/unla/issues) ❤️
+</Note>
+
+## 🔧 Core Design Principles
+
+<CardGroup cols={2}>
+  <Card title="✅ Zero Intrusion" icon="shield-check">
+    Platform-agnostic, supports deployment on bare metal, VMs, ECS, Kubernetes environments without modifying existing infrastructure
+  </Card>
+  <Card title="🔄 Configuration-Driven" icon="gear">
+    Transform traditional APIs into MCP services using YAML configuration — no code required
+  </Card>
+  <Card title="🪶 Lightweight & Efficient" icon="feather">
+    Designed for minimal resource usage without sacrificing performance or availability
+  </Card>
+  <Card title="🧭 Built-in Management Interface" icon="browser">
+    Out-of-the-box web interface that simplifies setup and reduces operational overhead
+  </Card>
+</CardGroup>
+
+## Architecture
+
+<img
+  className="block dark:hidden"
+  src="/images/architecture.light.svg"
+  alt="Unla Architecture Light"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/architecture.dark.svg"
+  alt="Unla Architecture Hero Dark"
+/>
+
+## 🚀 Core Features
+
+### 🔌 Protocol & Proxy Capabilities
+- ✅ Support for converting RESTful APIs to MCP services
+- ✅ Support for proxying MCP services
+- ✅ Support for MCP SSE
+- ✅ Support for MCP Streamable HTTP
+- ✅ Support for MCP responses including text, images, and audio
+- 🔄 Support for converting gRPC to MCP services (in development)
+- 🔄 Support for converting WebSocket to MCP services (in development)
+
+### 🧠 Session & Multi-tenancy Support
+- ✅ Persistent and recoverable session support
+- ✅ Multi-tenancy support
+- 🔄 Support for MCP service grouping and aggregation (in development)
+
+### 🛠 Configuration & Management
+- ✅ Automatic configuration retrieval and seamless hot reload
+- ✅ Configuration persistence (disk/SQLite/PostgreSQL/MySQL)
+- ✅ Configuration synchronization via OS signals, HTTP, or Redis PubSub
+- ✅ Configuration version control
+
+### 🔐 Security & Authentication
+- ✅ OAuth-based MCP service pre-authentication support
+
+### 📦 Deployment & Operations
+- ✅ Multi-replica service support
+- ✅ Docker support
+- ✅ Kubernetes and Helm deployment support
+
+<CardGroup cols={2}>
+  <Card
+    title="Quick Start"
+    icon="rocket"
+    href="/en/quickstart"
+  >
+    Quickly deploy and start Unla MCP Gateway service
+  </Card>
+  <Card
+    title="Docker Deployment"
+    icon="docker"
+    href="/en/deployment/docker"
+  >
+    Container deployment solution using Docker
+  </Card>
+  <Card
+    title="MCP Gateway Configuration"
+    icon="gear"
+    href="/en/configuration/mcp-gateway"
+  >
+    Configure MCP Gateway service parameters and options
+  </Card>
+  <Card
+    title="Client Integration"
+    icon="plug"
+    href="/en/client-usage/cursor"
+  >
+    Seamless integration with multiple MCP clients
+  </Card>
+</CardGroup>
+
+## 🌐 Community & Support
+
+<CardGroup cols={3}>
+  <Card
+    title="Discord Community"
+    icon="discord"
+    href="https://discord.gg/udf69cT9TY"
+  >
+    Join our Discord community for real-time support
+  </Card>
+  <Card
+    title="GitHub Issues"
+    icon="github"
+    href="https://github.com/amoylab/unla/issues"
+  >
+    Submit issues and feature requests
+  </Card>
+  <Card
+    title="Online Documentation"
+    icon="book"
+    href="https://docs.unla.amoylab.com/"
+  >
+    View complete online documentation
+  </Card>
+</CardGroup>

@@ -1,0 +1,227 @@
+---
+title: "Go Template Usage Guide"
+description: "How to use Go Template to process request and response data in MCP Gateway"
+---
+
+This document introduces how to use Go Template to process request and response data in MCP Gateway. Go Template provides powerful template functionality that helps us flexibly handle data transformation and formatting.
+
+## Basic Syntax
+
+Go Template uses `{{}}` as delimiters, and various functions and variables can be used within the delimiters. In MCP Gateway, we mainly use the following variables:
+
+<CardGroup cols={2}>
+  <Card title="Configuration Variables" icon="gear">
+    - `.Config`: Service-level configuration
+    - `.Args`: Request parameters
+  </Card>
+  <Card title="Runtime Variables" icon="play">
+    - `.Request`: Original request information
+    - `.Response`: Upstream service response information
+  </Card>
+</CardGroup>
+
+## Common Use Cases
+
+### 1. Getting Configuration from Environment Variables
+
+```yaml
+config:
+  Authorization: 'Bearer {{ env "AUTH_TOKEN" }}'  # Get configuration from environment variables
+```
+
+<Note>
+Using the `env` function allows you to safely retrieve sensitive information from environment variables, avoiding hardcoding in configuration files.
+</Note>
+
+### 2. Extracting Values from Request Headers
+
+```yaml
+headers:
+  Authorization: "{{.Request.Headers.Authorization}}"   # Pass through client's Authorization header
+  Cookie: "{{.Config.Cookie}}"                          # Use value from service configuration
+```
+
+### 3. Building Request Body
+
+```yaml
+requestBody: |-
+  {
+    "username": "{{.Args.username}}",
+    "email": "{{.Args.email}}"
+  }
+```
+
+### 4. Processing Response Data
+
+```yaml
+responseBody: |-
+  {
+    "id": "{{.Response.Data.id}}",
+    "username": "{{.Response.Data.username}}",
+    "email": "{{.Response.Data.email}}",
+    "createdAt": "{{.Response.Data.createdAt}}"
+  }
+```
+
+### 5. Handling Nested Response Data
+
+For complex nested data structures, you can access them layer by layer:
+
+```yaml
+responseBody: |-
+  {
+    "id": "{{.Response.Data.id}}",
+    "username": "{{.Response.Data.username}}",
+    "email": "{{.Response.Data.email}}",
+    "createdAt": "{{.Response.Data.createdAt}}",
+    "preferences": {
+      "isPublic": {{.Response.Data.preferences.isPublic}},
+      "showEmail": {{.Response.Data.preferences.showEmail}},
+      "theme": "{{.Response.Data.preferences.theme}}",
+      "tags": {{.Response.Data.preferences.tags}}
+    }
+  }
+```
+
+### 6. Handling Array Data
+
+When you need to process array data in responses, you can use Go Template's range functionality:
+
+```yaml
+responseBody: |-
+  {
+    "total": "{{.Response.Data.total}}",
+    "rows": [
+      {{- $len := len .Response.Data.rows -}}
+      {{- $rows := fromJSON .Response.Data.rows }}
+      {{- range $i, $e := $rows }}
+      {
+        "id": {{ $e.id }},
+        "detail": "{{ $e.detail }}",
+        "deviceName": "{{ $e.deviceName }}"
+      }{{ if lt (add $i 1) $len }},{{ end }}
+      {{- end }}
+    ]
+  }
+```
+
+<AccordionGroup>
+  <Accordion icon="code" title="Array Processing Tips Explanation">
+    This example shows how to:
+    1. Use the `fromJSON` function to convert JSON strings into traversable objects
+    2. Use `range` to iterate through arrays
+    3. Use the `len` function to get array length
+    4. Use the `add` function for mathematical operations
+    5. Use conditional statements `if` to control comma separation between array elements
+  </Accordion>
+</AccordionGroup>
+
+### 7. Using Parameters in URLs
+
+Dynamically building URL paths:
+
+```yaml
+endpoint: "http://localhost:5236/users/{{.Args.email}}/preferences"
+```
+
+### 8. Handling Complex Object Data
+
+When you need to convert complex structures like objects and arrays from requests or responses to JSON, you can use the `toJSON` function:
+
+```yaml
+requestBody: |-
+  {
+    "isPublic": {{.Args.isPublic}},
+    "showEmail": {{.Args.showEmail}},
+    "theme": "{{.Args.theme}}",
+    "tags": {{.Args.tags}},
+    "settings": {{ toJSON .Args.settings }}
+  }
+```
+
+<Tip>
+Here, `settings` is a complex object. Using the `toJSON` function will automatically convert `settings` to a JSON string.
+</Tip>
+
+## Built-in Functions
+
+Currently supports the following built-in functions:
+
+<AccordionGroup>
+  <Accordion icon="leaf" title="env - Environment Variables">
+    Get environment variable values
+    ```yaml
+    Authorization: 'Bearer {{ env "AUTH_TOKEN" }}'
+    ```
+  </Accordion>
+
+  <Accordion icon="plus" title="add - Mathematical Operations">
+    Perform integer addition operations
+    ```yaml
+    {{ if lt (add $i 1) $len }},{{ end }}
+    ```
+  </Accordion>
+
+  <Accordion icon="arrow-down" title="fromJSON - JSON Parsing">
+    Convert JSON strings to traversable objects
+    ```yaml
+    {{- $rows := fromJSON .Response.Data.rows }}
+    ```
+  </Accordion>
+
+  <Accordion icon="arrow-up" title="toJSON - JSON Serialization">
+    Convert objects to JSON strings
+    ```yaml
+    "settings": {{ toJSON .Args.settings }}
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Template Debugging Tips
+
+<Steps>
+  <Step title="Use Log Output">
+    During development, you can view actual values of template variables through logs
+  </Step>
+  <Step title="Step-by-step Construction">
+    For complex templates, it's recommended to first build a simple version, then gradually add complex logic
+  </Step>
+  <Step title="Test Edge Cases">
+    Ensure templates work correctly under various data conditions, including empty values, null values, etc.
+  </Step>
+</Steps>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion icon="shield-check" title="Security">
+    - Avoid directly exposing sensitive information in templates
+    - Use environment variables to store keys and passwords
+    - Properly validate and escape user input
+  </Accordion>
+
+  <Accordion icon="zap" title="Performance">
+    - Avoid complex calculations in templates
+    - Use caching mechanisms appropriately
+    - For large data processing, consider preprocessing in upstream services
+  </Accordion>
+
+  <Accordion icon="tools" title="Maintainability">
+    - Keep templates concise and clear
+    - Add appropriate comments and explanations
+    - Use meaningful variable names
+  </Accordion>
+</AccordionGroup>
+
+## Extension Features
+
+If you need to add new template functions, you can:
+
+1. **Describe specific use cases**, create an issue explaining the requirements
+2. **Welcome PR after implementation**, but currently only accept general-purpose functions
+
+## More Resources
+
+<Card title="Go Template Official Documentation" icon="book" href="https://pkg.go.dev/text/template">
+  View complete Go Template documentation and advanced usage
+</Card>

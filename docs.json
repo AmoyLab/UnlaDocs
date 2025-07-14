@@ -9,66 +9,120 @@
   },
   "favicon": "/images/logo.svg",
   "navigation": {
-    "tabs": [
+    "languages": [
       {
-        "tab": "指南",
+        "language": "cn",
+        "default": true,
         "groups": [
           {
             "group": "快速开始",
             "pages": [
-              "index",
-              "quickstart"
+              "cn/index",
+              "cn/quickstart"
             ]
           },
           {
             "group": "安装部署",
             "pages": [
-              "deployment/docker",
-              "deployment/k8s",
-              "deployment/binary"
+              "cn/deployment/docker",
+              "cn/deployment/k8s",
+              "cn/deployment/binary"
             ]
           },
           {
             "group": "配置说明",
             "pages": [
-              "configuration/apiserver",
-              "configuration/mcp-gateway",
-              "configuration/gateways",
-              "configuration/templates"
+              "cn/configuration/apiserver",
+              "cn/configuration/mcp-gateway",
+              "cn/configuration/gateways",
+              "cn/configuration/templates"
             ]
           },
           {
             "group": "客户端使用",
             "pages": [
-              "client-usage/cursor",
-              "client-usage/cherry-studio"
+              "cn/client-usage/cursor",
+              "cn/client-usage/cherry-studio"
             ]
           },
           {
             "group": "开发文档",
             "pages": [
-              "development/architecture",
-              "development/local-development"
+              "cn/development/architecture",
+              "cn/development/local-development"
             ]
-          }
-        ]
-      },
-      {
-        "tab": "API 参考",
-        "groups": [
+          },
           {
             "group": "API 文档",
             "pages": [
-              "api-reference/introduction"
+              "cn/api-reference/introduction"
             ]
           },
           {
             "group": "端点示例",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "cn/api-reference/endpoint/get",
+              "cn/api-reference/endpoint/create",
+              "cn/api-reference/endpoint/delete",
+              "cn/api-reference/endpoint/webhook"
+            ]
+          }
+        ]
+      },
+      {
+        "language": "en",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "en/index",
+              "en/quickstart"
+            ]
+          },
+          {
+            "group": "Deployment",
+            "pages": [
+              "en/deployment/docker",
+              "en/deployment/k8s",
+              "en/deployment/binary"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "en/configuration/apiserver",
+              "en/configuration/mcp-gateway",
+              "en/configuration/gateways",
+              "en/configuration/templates"
+            ]
+          },
+          {
+            "group": "Client Usage",
+            "pages": [
+              "en/client-usage/cursor",
+              "en/client-usage/cherry-studio"
+            ]
+          },
+          {
+            "group": "Development",
+            "pages": [
+              "en/development/architecture",
+              "en/development/local-development"
+            ]
+          },
+          {
+            "group": "API Documentation",
+            "pages": [
+              "en/api-reference/introduction"
+            ]
+          },
+          {
+            "group": "Endpoint Examples",
+            "pages": [
+              "en/api-reference/endpoint/get",
+              "en/api-reference/endpoint/create",
+              "en/api-reference/endpoint/delete",
+              "en/api-reference/endpoint/webhook"
             ]
           }
         ]

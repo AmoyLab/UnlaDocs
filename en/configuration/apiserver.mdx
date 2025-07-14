@@ -1,0 +1,234 @@
+---
+title: "API Server Configuration"
+description: "Detailed explanation of apiserver.yaml configuration file"
+---
+
+The configuration file supports environment variable injection using the `${VAR:default}` syntax. If an environment variable is not set, the default value will be used.
+
+A common practice is to inject values through different `.env`, `.env.development`, `.env.prod` files, though you can also directly modify the configuration with hardcoded values.
+
+## Logging Configuration
+
+Logging configuration controls the application's log output behavior:
+
+```yaml
+logger:
+  level: "${APISERVER_LOGGER_LEVEL:info}"                                         # Log level: debug, info, warn, error
+  format: "${APISERVER_LOGGER_FORMAT:console}"                                    # Log format: json, console
+  output: "${APISERVER_LOGGER_OUTPUT:stdout}"                                     # Output method: stdout, file
+  file_path: "${APISERVER_LOGGER_FILE_PATH:/var/log/unla/apiserver.log}"          # Log file path (when output is file)
+  max_size: ${APISERVER_LOGGER_MAX_SIZE:100}                                      # Maximum log file size (MB)
+  max_backups: ${APISERVER_LOGGER_MAX_BACKUPS:3}                                  # Number of backup files to retain
+  max_age: ${APISERVER_LOGGER_MAX_AGE:7}                                          # Backup file retention days
+  compress: ${APISERVER_LOGGER_COMPRESS:true}                                     # Whether to compress backup files
+  color: ${APISERVER_LOGGER_COLOR:true}                                           # Whether to use colors in console output
+  stacktrace: ${APISERVER_LOGGER_STACKTRACE:true}                                 # Whether error logs include stack traces
+```
+
+<CardGroup cols={2}>
+  <Card title="Log Levels" icon="chart-line">
+    Supports four levels: debug, info, warn, error
+  </Card>
+  <Card title="Output Format" icon="file-text">
+    Supports JSON structured output and console readable format
+  </Card>
+  <Card title="File Rotation" icon="refresh">
+    Automatically manages log file size and quantity
+  </Card>
+  <Card title="Stack Trace" icon="bug">
+    Error logs can include detailed call stack information
+  </Card>
+</CardGroup>
+
+## Internationalization Configuration
+
+Internationalization configuration is used to support multi-language interfaces:
+
+```yaml
+i18n:
+  path: "${APISERVER_I18N_PATH:/etc/unla/i18n}"                                   # Translation file path
+```
+
+<Note>
+The translation file path should contain translation files for various languages to support multi-language user interfaces.
+</Note>
+
+## Chat Message Database Configuration
+
+This configuration mainly targets the backend chat message storage configuration (of course, this can be stored in the same database as the proxy configuration), primarily used to store chat sessions and message data from the Web interface.
+
+<Note>
+The chat message database is mainly used to store MCP chat records conducted through the Web interface, and is separate from the gateway proxy configuration storage.
+</Note>
+
+### Supported Databases
+
+Currently supports 3 types of databases:
+
+<CardGroup cols={3}>
+  <Card title="SQLite3" icon="database">
+    Suitable for development environments and small-scale deployments
+  </Card>
+  <Card title="PostgreSQL" icon="elephant">
+    Recommended for production environments
+  </Card>
+  <Card title="MySQL" icon="mysql">
+    Traditional relational database choice
+  </Card>
+</CardGroup>
+
+### Configuration Example
+
+```yaml
+database:
+  type: "${APISERVER_DB_TYPE:sqlite}"               # Database type (sqlite, postgres, mysql)
+  host: "${APISERVER_DB_HOST:localhost}"            # Database host address
+  port: ${APISERVER_DB_PORT:5432}                   # Database port
+  user: "${APISERVER_DB_USER:postgres}"             # Database username
+  password: "${APISERVER_DB_PASSWORD:example}"      # Database password
+  dbname: "${APISERVER_DB_NAME:./unla.db}"          # Database name or file path
+  sslmode: "${APISERVER_DB_SSL_MODE:disable}"       # SSL mode for database connection
+```
+
+<Tip>
+If you need additional database support, you can request it in the [Issues](https://github.com/amoylab/unla/issues), or you can directly implement the corresponding impl and submit a PR :)
+</Tip>
+
+## Gateway Proxy Storage Configuration
+
+This is used to store gateway proxy configurations, which corresponds to the configuration that maps from MCP to API.
+
+Currently supports 2 storage methods:
+
+<AccordionGroup>
+  <Accordion icon="folder" title="disk storage">
+    Configurations are stored on disk as files, with each configuration as a separate file, similar to nginx vhost concept, such as `svc-a.yaml`, `svc-b.yaml`
+  </Accordion>
+  <Accordion icon="database" title="db storage">
+    Store in database, with each configuration as a record. Currently supports three databases: SQLite3, PostgreSQL, MySQL
+  </Accordion>
+</AccordionGroup>
+
+<Note>
+The `revision_history_limit` parameter controls the number of configuration version histories retained by the system, which helps with configuration rollback and auditing. The default is to retain 10 versions.
+</Note>
+
+### Configuration Example
+
+```yaml
+storage:
+  type: "${GATEWAY_STORAGE_TYPE:db}"                                      # Storage type: db, disk
+  revision_history_limit: ${GATEWAY_STORAGE_REVISION_HISTORY_LIMIT:10}    # Number of version histories to retain
+
+  # Database configuration (used when type is 'db')
+  database:
+    type: "${GATEWAY_DB_TYPE:sqlite}"                   # Database type (sqlite, postgres, mysql)
+    host: "${GATEWAY_DB_HOST:localhost}"                # Database host address
+    port: ${GATEWAY_DB_PORT:5432}                       # Database port
+    user: "${GATEWAY_DB_USER:postgres}"                 # Database username
+    password: "${GATEWAY_DB_PASSWORD:example}"          # Database password
+    dbname: "${GATEWAY_DB_NAME:./unla.db}"              # Database name or file path
+    sslmode: "${GATEWAY_DB_SSL_MODE:disable}"           # SSL mode for database connection
+
+  # Disk configuration (used when type is 'disk')
+  disk:
+    path: "${GATEWAY_STORAGE_DISK_PATH:}"               # Data file storage path
+```
+
+## Notification Configuration
+
+The notification configuration module is mainly used to let `mcp-gateway` sense updates and perform hot reloading without restarting the service when configuration is updated.
+
+### Supported Notification Methods
+
+<CardGroup cols={2}>
+  <Card title="signal" icon="bell">
+    Notify by sending operating system signals, similar to `kill -SIGHUP <pid>` or `nginx -s reload`
+  </Card>
+  <Card title="api" icon="api">
+    Notify by calling an API, `mcp-gateway` will listen on a separate port
+  </Card>
+  <Card title="redis" icon="database">
+    Notify through Redis publish/subscribe functionality, suitable for single-machine or cluster deployments
+  </Card>
+  <Card title="composite" icon="puzzle-piece">
+    Composite notification using multiple methods, `signal` and `api` are always enabled by default
+  </Card>
+</CardGroup>
+
+### Notification Roles
+
+<Steps>
+  <Step title="sender">
+    Sender, responsible for sending notifications, `apiserver` can only use this mode
+  </Step>
+  <Step title="receiver">
+    Receiver, responsible for receiving notifications, single-machine `mcp-gateway` should only use this mode
+  </Step>
+  <Step title="both">
+    Both sender and receiver, cluster-deployed `mcp-gateway` can use this method
+  </Step>
+</Steps>
+
+### Configuration Example
+
+```yaml
+notifier:
+  role: "${APISERVER_NOTIFIER_ROLE:sender}"  # Role: 'sender' or 'receiver'
+  type: "${APISERVER_NOTIFIER_TYPE:signal}"  # Type: 'signal', 'api', 'redis' or 'composite'
+
+  # Signal configuration (used when type is 'signal')
+  signal:
+    signal: "${APISERVER_NOTIFIER_SIGNAL:SIGHUP}"                       # Signal to send
+    pid: "${APISERVER_NOTIFIER_SIGNAL_PID:/var/run/mcp-gateway.pid}"    # PID file path
+
+  # API configuration (used when type is 'api')
+  api:
+    port: ${APISERVER_NOTIFIER_API_PORT:5235}                                           # API port
+    target_url: "${APISERVER_NOTIFIER_API_TARGET_URL:http://localhost:5235/_reload}"    # Reload endpoint
+
+  # Redis configuration (used when type is 'redis')
+  redis:
+    addr: "${APISERVER_NOTIFIER_REDIS_ADDR:localhost:6379}"                             # Redis address
+    password: "${APISERVER_NOTIFIER_REDIS_PASSWORD:UseStrongPasswordIsAGoodPractice}"   # Redis password
+    db: ${APISERVER_NOTIFIER_REDIS_DB:0}                                                # Redis database number
+    topic: "${APISERVER_NOTIFIER_REDIS_TOPIC:mcp-gateway:reload}"                       # Redis publish/subscribe topic
+```
+
+
+## Super Administrator Configuration
+
+Super administrator configuration is used to set up the system's initial administrator account. Each time `apiserver` starts, it will automatically detect if it exists, and if not, it will be created automatically.
+
+```yaml
+super_admin:
+  username: "${SUPER_ADMIN_USERNAME:admin}"                                     # Super administrator username
+  password: "${SUPER_ADMIN_PASSWORD:changeme-please-use-a-secure-password}"     # Super administrator password (please change in production)
+```
+
+<Warning>
+**Strongly recommend using strong passwords in production or public network environments!**
+</Warning>
+
+## JWT Configuration
+
+JWT configuration is used to set web authentication related parameters:
+
+```yaml
+jwt:
+  secret_key: "${APISERVER_JWT_SECRET_KEY:changeme-please-generate-a-random-secret}"  # JWT secret key (please change in production)
+  duration: "${APISERVER_JWT_DURATION:24h}"                                           # Token validity period
+```
+
+<Warning>
+**Strongly recommend using strong passwords in production or public network environments!**
+</Warning>
+
+## Configuration File Location
+
+By default, the configuration file should be placed in the following locations:
+
+- Container deployment: `/app/configs/apiserver.yaml`
+- Binary deployment: `./configs/apiserver.yaml`
+
+You can specify a custom configuration file path through environment variables or command line parameters.

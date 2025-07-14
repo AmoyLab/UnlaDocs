@@ -1,0 +1,119 @@
+---
+title: "Cursor Configuration Guide"
+description: "How to configure MCP Gateway in Cursor"
+---
+
+<Note>
+For more detailed Cursor MCP configuration tutorials, please check the [official Cursor documentation](https://docs.cursor.com/context/model-context-protocol)
+</Note>
+
+## Configuration Steps
+
+Here's a simple demonstration of the most basic configuration method. Make sure you have created the relevant directories and files:
+
+<Steps>
+  <Step title="Create Configuration Directory">
+    ```bash
+    mkdir -p .cursor
+    touch .cursor/mcp.json
+    ```
+  </Step>
+
+  <Step title="Configure MCP Server">
+    Add the following configuration to `.cursor/mcp.json`. Here we'll use our own mock user service for testing:
+
+    ```json
+    {
+      "mcpServers": {
+        "user": {
+          "url": "http://localhost:5235/gateway/user/sse"
+        }
+      }
+    }
+    ```
+  </Step>
+
+  <Step title="Enable MCP Server">
+    1. Open Cursor settings
+    2. Enable this MCP Server in the **MCP** section
+    3. After enabling, you'll see it become a small green dot
+    4. It will also list the available Tools
+  </Step>
+</Steps>
+
+## Configuration Verification
+
+After configuration is complete, you can see the following in Cursor's settings interface:
+
+<CardGroup cols={2}>
+  <Card title="Connection Status" icon="circle-check">
+    Green dot indicates MCP Server connection is normal
+  </Card>
+  <Card title="Available Tools" icon="tools">
+    The interface will display the list of available tools retrieved from MCP Gateway
+  </Card>
+</CardGroup>
+
+## Usage Example
+
+Finally, you can try it in the Chat window, for example, ask it to help you register a user, then query that user's information. If it works, you're all set.
+
+### Example Conversation
+
+```
+Help me register a user Leo ifuryst@gmail.com
+```
+
+```
+Help me query user ifuryst@gmail.com, if not found please register with username Leo
+```
+
+<Warning>
+Through actual testing, we found that this mock service may cause model errors in some cases due to involving names and emails, resulting in inability to call. You can ignore this situation and configure actual APIs for use.
+</Warning>
+
+## Common Issues
+
+<AccordionGroup>
+  <Accordion icon="exclamation-triangle" title="Connection Failed">
+    - Ensure MCP Gateway service is running
+    - Check if port 5235 is accessible
+    - Verify URL configuration is correct
+  </Accordion>
+
+  <Accordion icon="tools" title="Tools Cannot Be Used">
+    - Check if MCP Server configuration is loaded correctly
+    - Verify tool permission configuration
+    - Check MCP Gateway logs for detailed error information
+  </Accordion>
+
+  <Accordion icon="refresh" title="Configuration Updates Not Taking Effect">
+    - Restart Cursor
+    - Reload MCP configuration
+    - Check if configuration file format is correct
+  </Accordion>
+</AccordionGroup>
+
+## Advanced Configuration
+
+For more complex use cases, you can configure multiple MCP Servers:
+
+```json
+{
+  "mcpServers": {
+    "user-service": {
+      "url": "http://localhost:5235/gateway/user/sse"
+    },
+    "order-service": {
+      "url": "http://localhost:5235/gateway/order/sse"
+    },
+    "product-service": {
+      "url": "http://localhost:5235/gateway/product/sse"
+    }
+  }
+}
+```
+
+<Tip>
+Each MCP Server corresponds to a business domain, which allows better organization and management of different functional modules.
+</Tip>

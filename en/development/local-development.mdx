@@ -1,0 +1,268 @@
+---
+title: "Local Development Environment"
+description: "How to set up and start a complete MCP Gateway development environment locally"
+---
+
+This document describes how to set up and start a complete MCP Gateway development environment locally, including starting all necessary service components.
+
+## Prerequisites
+
+Before getting started, please ensure your system has the following software installed:
+
+<CardGroup cols={3}>
+  <Card title="Git" icon="git">
+    Version control tool
+  </Card>
+  <Card title="Go 1.24.1+" icon="golang">
+    Go programming language environment
+  </Card>
+  <Card title="Node.js v20.18.0+" icon="nodejs">
+    JavaScript runtime environment (includes npm)
+  </Card>
+</CardGroup>
+
+## Project Architecture Overview
+
+The MCP Gateway project consists of the following core components:
+
+<AccordionGroup>
+  <Accordion icon="server" title="apiserver">
+    Provides API services for configuration management, user interfaces, etc.
+  </Accordion>
+  <Accordion icon="gateway" title="mcp-gateway">
+    Core gateway service that handles MCP protocol conversion
+  </Accordion>
+  <Accordion icon="flask" title="mock-server">
+    Mock user service for development testing
+  </Accordion>
+  <Accordion icon="browser" title="web">
+    Management interface frontend
+  </Accordion>
+</AccordionGroup>
+
+## Environment Setup Steps
+
+### 1. Get Source Code
+
+<Steps>
+  <Step title="Fork Project">
+    Visit the [MCP Gateway code repository](https://github.com/amoylab/unla), click the `Fork` button to fork the project to your GitHub account
+  </Step>
+
+  <Step title="Clone Locally">
+    ```bash
+    git clone https://github.com/your-github-username/unla.git
+    cd unla
+    ```
+  </Step>
+</Steps>
+
+### 2. Install Dependencies
+
+<Steps>
+  <Step title="Install Go Dependencies">
+    ```bash
+    go mod tidy
+    ```
+  </Step>
+
+  <Step title="Install Node.js Dependencies">
+    ```bash
+    cd web
+    npm i
+    cd ..
+    ```
+  </Step>
+</Steps>
+
+### 3. Configure Environment
+
+<Steps>
+  <Step title="Backend Configuration">
+    ```bash
+    cp .env.example .env
+    ```
+  </Step>
+
+  <Step title="Frontend Configuration">
+    ```bash
+    cd web
+    cp .env.example .env
+    cd ..
+    ```
+  </Step>
+</Steps>
+
+<Note>
+You can start development without modifying anything, using the default configuration. You can also modify configuration files to meet your environment or development needs, such as switching between Disk, DB storage methods.
+</Note>
+
+## Start Development Services
+
+You need 4 terminal windows to run all services. This approach of running multiple services on the host machine allows for easy restart and debugging during development.
+
+### Terminal 1: Start mcp-gateway
+
+```bash
+go run cmd/gateway/main.go
+```
+
+mcp-gateway will start by default on `http://localhost:5235` for handling MCP protocol requests.
+
+### Terminal 2: Start apiserver
+
+```bash
+go run cmd/apiserver/main.go
+```
+
+apiserver will start by default on `http://localhost:5234`.
+
+### Terminal 3: Start mock-server
+
+```bash
+go run cmd/mock-server/main.go
+```
+
+- mock-server will start by default on `http://localhost:5236`
+- mock-server-sse will start by default on `http://localhost:5237`
+
+### Terminal 4: Start web frontend
+
+```bash
+cd web
+npm run dev
+```
+
+After running the command in the web terminal, it will display the access address.
+
+## Access Management Interface
+
+After startup is complete, you can access the management interface in your browser using the address shown in the terminal.
+
+<CardGroup cols={2}>
+  <Card title="Default Login Information" icon="key">
+    - Username: Determined by environment variable `SUPER_ADMIN_USERNAME`
+    - Password: Determined by environment variable `SUPER_ADMIN_PASSWORD`
+  </Card>
+  <Card title="First Login" icon="user">
+    After logging in, you can modify the username and password in the management interface
+  </Card>
+</CardGroup>
+
+## Common Issues
+
+### Environment Variable Settings
+
+Some services may require specific environment variables to work properly. You can set these variables in the `.env` file:
+
+```bash
+# Example environment variables
+APISERVER_JWT_SECRET_KEY="changeme-please-generate-a-random-secret"
+SUPER_ADMIN_USERNAME="admin"
+SUPER_ADMIN_PASSWORD="changeme-please-use-a-secure-password"
+```
+
+### Port Conflicts
+
+If you encounter port conflicts, you can modify port configuration in environment variables:
+
+```bash
+MCP_GATEWAY_PORT=5235
+APISERVER_PORT=5234
+MOCK_SERVER_PORT=5236
+```
+
+### Dependency Issues
+
+If you encounter dependency installation issues:
+
+<AccordionGroup>
+  <Accordion icon="golang" title="Go Dependency Issues">
+    ```bash
+    go clean -modcache
+    go mod tidy
+    ```
+  </Accordion>
+
+  <Accordion icon="nodejs" title="Node.js Dependency Issues">
+    ```bash
+    cd web
+    rm -rf node_modules package-lock.json
+    npm install
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Development Workflow
+
+### Code Contribution Process
+
+<Steps>
+  <Step title="Add Upstream Repository">
+    ```bash
+    git remote add upstream git@github.com:amoylab/unla.git
+    ```
+  </Step>
+
+  <Step title="Sync Upstream Code">
+    ```bash
+    git pull upstream main
+    ```
+  </Step>
+
+  <Step title="Create Feature Branch">
+    ```bash
+    git switch -c feat/your-feature-name
+    ```
+  </Step>
+
+  <Step title="Push After Development">
+    ```bash
+    git push origin feat/your-feature-name
+    ```
+  </Step>
+
+  <Step title="Create Pull Request">
+    Create a Pull Request on GitHub to merge your branch into the main repository's main branch
+  </Step>
+</Steps>
+
+### Branch Naming Conventions
+
+<CardGroup cols={2}>
+  <Card title="New Features" icon="plus">
+    Use `feat/` prefix, such as `feat/add-auth-module`
+  </Card>
+  <Card title="Bug Fixes" icon="bug">
+    Use `fix/` prefix, such as `fix/memory-leak`
+  </Card>
+</CardGroup>
+
+### Development Considerations
+
+<AccordionGroup>
+  <Accordion icon="test-tube" title="Testing">
+    Before submitting a PR, ensure your code passes all tests
+  </Accordion>
+
+  <Accordion icon="sync" title="Code Synchronization">
+    Keep your fork repository synchronized with the upstream repository to avoid code conflicts
+  </Accordion>
+
+  <Accordion icon="code" title="Code Standards">
+    Follow the project's code standards and commit message format
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+After successfully starting the local development environment, you can:
+
+<CardGroup cols={2}>
+  <Card title="Understand Architecture" icon="sitemap" href="/en/development/architecture">
+    View architecture documentation to deeply understand system components
+  </Card>
+  <Card title="Learn Configuration" icon="gear" href="/en/configuration/gateways">
+    Read configuration guide to learn how to configure the gateway
+  </Card>
+</CardGroup>
