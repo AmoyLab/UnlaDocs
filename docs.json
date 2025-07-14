@@ -136,12 +136,12 @@
           "icon": "github"
         },
         {
-          "anchor": "社区讨论",
+          "anchor": "Discussions",
           "href": "https://github.com/amoylab/unla/discussions",
           "icon": "comments"
         },
         {
-          "anchor": "问题反馈",
+          "anchor": "Issues",
           "href": "https://github.com/amoylab/unla/issues",
           "icon": "bug"
         }
@@ -155,13 +155,13 @@
   "navbar": {
     "links": [
       {
-        "label": "获取支持",
+        "label": "Support",
         "href": "https://github.com/amoylab/unla/issues"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "立即部署",
+      "label": "Let's Go 🚀",
       "href": "https://github.com/amoylab/unla"
     }
   },
