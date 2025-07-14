@@ -22,7 +22,7 @@ Images are published to the following three repositories:
 
 - **Docker Hub**: `docker.io/ifuryst/unla-*`
 - **GitHub Container Registry**: `ghcr.io/amoylab/unla/*`
-- **阿里云容器镜像服务**: `registry.ap-southeast-1.aliyuncs.com/amoylab/unla-*`
+- **Alibaba Cloud Container Registry**: `registry.ap-southeast-1.aliyuncs.com/amoylab/unla-*`
 
 <Note>
 GHCR supports multi-level directories, so the organization structure is clearer. Docker and Aliyun repositories only support single-level directories, so image names are joined with `-`.
@@ -30,8 +30,8 @@ GHCR supports multi-level directories, so the organization structure is clearer.
 
 ### Image Tags
 
-- `latest`: 最新版本
-- `vX.Y.Z`: 特定版本号
+- `latest`: Latest version
+- `vX.Y.Z`: Specific version number
 
 <Warning>
 MCP Gateway is currently in rapid iteration! Therefore, it is recommended to deploy with version numbers for better reliability.
@@ -40,7 +40,7 @@ MCP Gateway is currently in rapid iteration! Therefore, it is recommended to dep
 ### Available Images
 
 ```bash
-# All-in-One 版本
+# All-in-One version
 docker pull docker.io/ifuryst/unla-allinone:latest
 docker pull ghcr.io/amoylab/unla/allinone:latest
 docker pull registry.ap-southeast-1.aliyuncs.com/amoylab/unla-allinone:latest
@@ -60,7 +60,7 @@ docker pull docker.io/ifuryst/unla-mock-server:latest
 docker pull ghcr.io/amoylab/unla/mock-server:latest
 docker pull registry.ap-southeast-1.aliyuncs.com/amoylab/unla-mock-server:latest
 
-# Web 前端
+# Web frontend
 docker pull docker.io/ifuryst/unla-web:latest
 docker pull ghcr.io/amoylab/unla/web:latest
 docker pull registry.ap-southeast-1.aliyuncs.com/amoylab/unla-web:latest
@@ -191,32 +191,32 @@ Suitable for production environments, can be deployed as needed, especially for 
   </Card>
 </CardGroup>
 
-### Docker Compose 部署
+### Docker Compose Deployment
 
 <Steps>
-  <Step title="下载配置文件">
+  <Step title="Download Configuration Files">
     ```bash
     curl -sL https://raw.githubusercontent.com/amoylab/unla/refs/heads/main/deploy/docker/multi/docker-compose.yml -o docker-compose.yml
     curl -sL https://raw.githubusercontent.com/amoylab/unla/refs/heads/main/.env.example -o .env
     ```
   </Step>
-  <Step title="修改配置">
-    编辑 `docker-compose.yml` 和 `.env` 文件：
-    1. 修改数据库、Redis 相关的账号密码
-    2. 按需修改暴露的端口
-    3. 配置 LLM 服务参数
+  <Step title="Modify Configuration">
+    Edit `docker-compose.yml` and `.env` files:
+    1. Modify database and Redis account passwords
+    2. Adjust exposed ports as needed
+    3. Configure LLM service parameters
   </Step>
-  <Step title="启动服务">
+  <Step title="Start Services">
     ```bash
     docker compose up -d
     ```
   </Step>
-  <Step title="配置负载均衡">
-    按需配置 Nginx 等 LB 层
+  <Step title="Configure Load Balancing">
+    Configure Nginx or other LB layers as needed
   </Step>
 </Steps>
 
-### 示例配置
+### Example Configuration
 
 <AccordionGroup>
   <Accordion icon="file-code" title="docker-compose.yml">
@@ -290,7 +290,7 @@ Suitable for production environments, can be deployed as needed, especially for 
         restart: always
     ```
   </Accordion>
-  <Accordion icon="gear" title="Nginx 配置示例">
+  <Accordion icon="gear" title="Nginx Configuration Example">
     ```nginx
     server {
         server_name unla.amoylab.com;
@@ -342,14 +342,14 @@ Suitable for production environments, can be deployed as needed, especially for 
   </Accordion>
 </AccordionGroup>
 
-### 重要访问 URL
+### Important Access URLs
 
-配置完成后，可通过以下 URL 访问服务：
+After configuration is complete, you can access the services through the following URLs:
 
-- **Web 管理界面**: https://unla.amoylab.com/
+- **Web Management Interface**: https://unla.amoylab.com/
 - **MCP Gateway**: https://unla.amoylab.com/gateway/*
-- **示例 MCP 端点**: https://unla.amoylab.com/gateway/user/mcp
+- **Example MCP Endpoint**: https://unla.amoylab.com/gateway/user/mcp
 
 <Note>
-请根据您的实际域名和配置调整上述 URL。
+Please adjust the above URLs according to your actual domain and configuration.
 </Note>

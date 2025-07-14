@@ -12,7 +12,6 @@
     "languages": [
       {
         "language": "cn",
-        "default": true,
         "groups": [
           {
             "group": "快速开始",
@@ -71,6 +70,7 @@
       },
       {
         "language": "en",
+        "default": true,
         "groups": [
           {
             "group": "Getting Started",
