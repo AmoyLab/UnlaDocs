@@ -141,6 +141,140 @@ session:
 When using memory storage, service restart will cause all session information to be lost. Redis storage is recommended for production environments.
 </Warning>
 
+## Forward Headers Configuration
+
+The forward headers configuration allows the MCP Gateway to forward HTTP headers from client requests to downstream services. This feature is useful for authentication, request tracing, and custom header propagation.
+
+<Info>
+Forward headers functionality is disabled by default for backward compatibility. Enable it by setting `enabled: true` in the configuration.
+</Info>
+
+### Features
+
+<CardGroup cols={2}>
+  <Card title="Header Filtering" icon="filter">
+    Control which headers are forwarded using allow/ignore lists with case-insensitive matching
+  </Card>
+  <Card title="Client Headers" icon="globe">
+    Forward headers from client requests (tools/list and tools/call) to downstream services
+  </Card>
+  <Card title="Argument Headers" icon="code">
+    Support forwarding headers passed as tool arguments via configurable parameter names
+  </Card>
+  <Card title="Override Control" icon="toggle-on">
+    Choose whether to override existing headers or add to them
+  </Card>
+</CardGroup>
+
+### Configuration Options
+
+```yaml
+forward:
+  enabled: ${FORWARD_ENABLED:false}                                     # Enable forward headers (default: false)
+  
+  mcp_arg:
+    key_for_header: "${FORWARD_MCP_ARG_KEY_FOR_HEADER:__forwardHeaders}" # Parameter name for tool arguments
+  
+  header:
+    allow_headers: "${FORWARD_ALLOW_HEADERS:}"                          # Comma-separated list of allowed headers (takes priority)
+    ignore_headers: "${FORWARD_IGNORE_HEADERS:Accept, Accept-Encoding, Accept-Language, Host, Cookie, Connection, User-Agent, Content-Length, Content-Type}" # Headers to ignore
+    case_insensitive: ${FORWARD_HEADER_CASE_INSENSITIVE:true}           # Case insensitive header matching
+    override_existing: ${FORWARD_HEADER_OVERRIDE_EXISTING:false}        # Override existing headers instead of adding
+```
+
+### Header Filtering Logic
+
+The filtering logic follows a priority-based approach:
+
+<Steps>
+  <Step title="Priority Check">
+    If `allow_headers` is configured (non-empty), it takes priority and `ignore_headers` is completely ignored
+  </Step>
+  <Step title="Allow List Mode">
+    When `allow_headers` is set, only headers in this list are forwarded, all others are ignored
+  </Step>
+  <Step title="Ignore List Mode">
+    When `allow_headers` is empty, headers in `ignore_headers` list are filtered out, others are forwarded
+  </Step>
+  <Step title="Case Sensitivity">
+    Header matching respects the `case_insensitive` setting for both allow and ignore lists
+  </Step>
+</Steps>
+
+### Usage Examples
+
+#### Example 1: Allow Only Specific Headers
+
+```yaml
+forward:
+  enabled: true
+  header:
+    allow_headers: "Authorization, X-API-Key, X-Request-ID"
+    ignore_headers: "Host, Cookie"  # This will be ignored
+    case_insensitive: true
+```
+
+**Result**: Only `Authorization`, `X-API-Key`, and `X-Request-ID` headers are forwarded.
+
+#### Example 2: Block Specific Headers
+
+```yaml
+forward:
+  enabled: true
+  header:
+    allow_headers: ""  # Empty - use ignore list instead
+    ignore_headers: "Accept, Host, Cookie, User-Agent"
+    case_insensitive: true
+```
+
+**Result**: All headers except `Accept`, `Host`, `Cookie`, and `User-Agent` are forwarded.
+
+#### Example 3: Tool Argument Headers
+
+```yaml
+forward:
+  enabled: true
+  mcp_arg:
+    key_for_header: "custom_headers"
+  header:
+    override_existing: true
+```
+
+Tools can now pass headers via the `custom_headers` argument:
+
+```json
+{
+  "name": "api_call",
+  "arguments": {
+    "url": "https://api.example.com/data",
+    "custom_headers": {
+      "Authorization": "Bearer token123",
+      "X-Custom-Header": "value"
+    }
+  }
+}
+```
+
+### Environment Variables
+
+All forward headers settings can be configured via environment variables:
+
+```bash
+# Enable the feature
+FORWARD_ENABLED=true
+
+# Configure header forwarding behavior
+FORWARD_MCP_ARG_KEY_FOR_HEADER=__forwardHeaders
+FORWARD_ALLOW_HEADERS="Authorization, X-API-Key"
+FORWARD_IGNORE_HEADERS="Accept, Host, Cookie"
+FORWARD_HEADER_CASE_INSENSITIVE=true
+FORWARD_HEADER_OVERRIDE_EXISTING=false
+```
+
+<Warning>
+When enabling forward headers in production, carefully review which headers should be forwarded to avoid security risks such as exposing sensitive authentication tokens or cookies.
+</Warning>
+
 ## Configuration File Location
 
 By default, configuration files should be placed in the following locations:

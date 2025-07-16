@@ -141,6 +141,140 @@ session:
 使用 memory 存储时，服务重启会导致所有会话信息丢失。生产环境建议使用 redis 存储。
 </Warning>
 
+## Forward Headers 配置
+
+Forward Headers 配置允许 MCP Gateway 将客户端请求中的 HTTP 头部转发到下游服务。此功能对于身份验证、请求追踪和自定义头部传播非常有用。
+
+<Info>
+为了向后兼容，Forward Headers 功能默认为禁用状态。通过在配置中设置 `enabled: true` 来启用此功能。
+</Info>
+
+### 功能特性
+
+<CardGroup cols={2}>
+  <Card title="头部过滤" icon="filter">
+    使用允许/忽略列表控制哪些头部被转发，支持大小写不敏感匹配
+  </Card>
+  <Card title="客户端头部" icon="globe">
+    将客户端请求（tools/list 和 tools/call）中的头部转发到下游服务
+  </Card>
+  <Card title="参数头部" icon="code">
+    支持通过可配置的参数名称转发作为工具参数传递的头部
+  </Card>
+  <Card title="覆盖控制" icon="toggle-on">
+    选择是否覆盖现有头部或添加到现有头部
+  </Card>
+</CardGroup>
+
+### 配置选项
+
+```yaml
+forward:
+  enabled: ${FORWARD_ENABLED:false}                                     # 启用 forward headers（默认：false）
+  
+  mcp_arg:
+    key_for_header: "${FORWARD_MCP_ARG_KEY_FOR_HEADER:__forwardHeaders}" # 工具参数的参数名
+  
+  header:
+    allow_headers: "${FORWARD_ALLOW_HEADERS:}"                          # 允许的头部列表，逗号分隔（优先级更高）
+    ignore_headers: "${FORWARD_IGNORE_HEADERS:Accept, Accept-Encoding, Accept-Language, Host, Cookie, Connection, User-Agent, Content-Length, Content-Type}" # 要忽略的头部
+    case_insensitive: ${FORWARD_HEADER_CASE_INSENSITIVE:true}           # 大小写不敏感的头部匹配
+    override_existing: ${FORWARD_HEADER_OVERRIDE_EXISTING:false}        # 覆盖现有头部而不是添加
+```
+
+### 头部过滤逻辑
+
+过滤逻辑遵循基于优先级的方法：
+
+<Steps>
+  <Step title="优先级检查">
+    如果配置了 `allow_headers`（非空），它优先生效，`ignore_headers` 会被完全忽略
+  </Step>
+  <Step title="允许列表模式">
+    当设置 `allow_headers` 时，只有此列表中的头部会被转发，其他所有头部都被忽略
+  </Step>
+  <Step title="忽略列表模式">
+    当 `allow_headers` 为空时，`ignore_headers` 列表中的头部会被过滤掉，其他头部会被转发
+  </Step>
+  <Step title="大小写敏感性">
+    头部匹配遵循 `case_insensitive` 设置，同时适用于允许和忽略列表
+  </Step>
+</Steps>
+
+### 使用示例
+
+#### 示例 1: 只允许特定头部
+
+```yaml
+forward:
+  enabled: true
+  header:
+    allow_headers: "Authorization, X-API-Key, X-Request-ID"
+    ignore_headers: "Host, Cookie"  # 这个会被忽略
+    case_insensitive: true
+```
+
+**结果**: 只有 `Authorization`、`X-API-Key` 和 `X-Request-ID` 头部会被转发。
+
+#### 示例 2: 阻止特定头部
+
+```yaml
+forward:
+  enabled: true
+  header:
+    allow_headers: ""  # 空值 - 使用忽略列表
+    ignore_headers: "Accept, Host, Cookie, User-Agent"
+    case_insensitive: true
+```
+
+**结果**: 除了 `Accept`、`Host`、`Cookie` 和 `User-Agent` 外，所有头部都会被转发。
+
+#### 示例 3: 工具参数头部
+
+```yaml
+forward:
+  enabled: true
+  mcp_arg:
+    key_for_header: "custom_headers"
+  header:
+    override_existing: true
+```
+
+工具现在可以通过 `custom_headers` 参数传递头部：
+
+```json
+{
+  "name": "api_call",
+  "arguments": {
+    "url": "https://api.example.com/data",
+    "custom_headers": {
+      "Authorization": "Bearer token123",
+      "X-Custom-Header": "value"
+    }
+  }
+}
+```
+
+### 环境变量
+
+所有 forward headers 设置都可以通过环境变量进行配置：
+
+```bash
+# 启用功能
+FORWARD_ENABLED=true
+
+# 配置头部转发行为
+FORWARD_MCP_ARG_KEY_FOR_HEADER=__forwardHeaders
+FORWARD_ALLOW_HEADERS="Authorization, X-API-Key"
+FORWARD_IGNORE_HEADERS="Accept, Host, Cookie"
+FORWARD_HEADER_CASE_INSENSITIVE=true
+FORWARD_HEADER_OVERRIDE_EXISTING=false
+```
+
+<Warning>
+在生产环境中启用 forward headers 时，请仔细审查应该转发哪些头部，以避免安全风险，如暴露敏感的身份验证令牌或 cookies。
+</Warning>
+
 ## 配置文件位置
 
 默认情况下，配置文件应放置在以下位置：
