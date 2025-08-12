@@ -23,11 +23,11 @@ pid: "${MCP_GATEWAY_PID:/var/run/mcp-gateway.pid}"  # PID文件路径
 存储配置模块主要用于存储网关的代理配置信息。目前支持两种存储方式：
 
 <CardGroup cols={2}>
-  <Card title="disk 存储" icon="folder">
-    配置会以文件的形式存放在磁盘里，每个配置单独一个文件，可以理解跟 nginx 的 vhost 一个道理
-  </Card>
   <Card title="db 存储" icon="database">
     存到数据库，每个配置是一条记录，支持 SQLite3、PostgreSQL、MySQL
+  </Card>
+  <Card title="api 存储" icon="api">
+    通过 API 端点存储配置，允许使用外部配置管理系统
   </Card>
 </CardGroup>
 
@@ -35,7 +35,7 @@ pid: "${MCP_GATEWAY_PID:/var/run/mcp-gateway.pid}"  # PID文件路径
 
 ```yaml
 storage:
-  type: "${GATEWAY_STORAGE_TYPE:db}"                    # 存储类型：db, disk
+  type: "${GATEWAY_STORAGE_TYPE:db}"                    # 存储类型：db, api
 
   # 数据库配置（当 type 为 'db' 时使用）
   database:
@@ -47,9 +47,11 @@ storage:
     dbname: "${GATEWAY_DB_NAME:./data/mcp-gateway.db}"  # 数据库名称或文件路径
     sslmode: "${GATEWAY_DB_SSL_MODE:disable}"           # 数据库连接的 SSL 模式
 
-  # 磁盘配置（当 type 为 'disk' 时使用）
-  disk:
-    path: "${GATEWAY_STORAGE_DISK_PATH:}"               # 数据文件存储路径
+  # API 配置（当 type 为 'api' 时使用）
+  api:
+    url: "${GATEWAY_STORAGE_API_URL:}"                  # API 端点 URL
+    configJSONPath: "${GATEWAY_STORAGE_API_CONFIG_JSON_PATH:}"  # API 响应中配置的 JSON 路径
+    timeout: "${GATEWAY_STORAGE_API_TIMEOUT:30s}"       # 请求超时时间
 ```
 
 ## 通知配置

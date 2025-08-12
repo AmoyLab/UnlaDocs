@@ -101,11 +101,11 @@ This is used to store gateway proxy configurations, which corresponds to the con
 Currently supports 2 storage methods:
 
 <AccordionGroup>
-  <Accordion icon="folder" title="disk storage">
-    Configurations are stored on disk as files, with each configuration as a separate file, similar to nginx vhost concept, such as `svc-a.yaml`, `svc-b.yaml`
-  </Accordion>
   <Accordion icon="database" title="db storage">
     Store in database, with each configuration as a record. Currently supports three databases: SQLite3, PostgreSQL, MySQL
+  </Accordion>
+  <Accordion icon="api" title="api storage">
+    Store configurations through API endpoints, allowing for external configuration management systems
   </Accordion>
 </AccordionGroup>
 
@@ -117,7 +117,7 @@ The `revision_history_limit` parameter controls the number of configuration vers
 
 ```yaml
 storage:
-  type: "${GATEWAY_STORAGE_TYPE:db}"                                      # Storage type: db, disk
+  type: "${GATEWAY_STORAGE_TYPE:db}"                                      # Storage type: db, api
   revision_history_limit: ${GATEWAY_STORAGE_REVISION_HISTORY_LIMIT:10}    # Number of version histories to retain
 
   # Database configuration (used when type is 'db')
@@ -130,9 +130,11 @@ storage:
     dbname: "${GATEWAY_DB_NAME:./unla.db}"              # Database name or file path
     sslmode: "${GATEWAY_DB_SSL_MODE:disable}"           # SSL mode for database connection
 
-  # Disk configuration (used when type is 'disk')
-  disk:
-    path: "${GATEWAY_STORAGE_DISK_PATH:}"               # Data file storage path
+  # API configuration (used when type is 'api')
+  api:
+    url: "${GATEWAY_STORAGE_API_URL:}"                  # API endpoint URL
+    configJSONPath: "${GATEWAY_STORAGE_API_CONFIG_JSON_PATH:}"  # JSON path for config in API response
+    timeout: "${GATEWAY_STORAGE_API_TIMEOUT:30s}"       # Request timeout
 ```
 
 ## Notification Configuration

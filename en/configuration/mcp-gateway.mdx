@@ -23,11 +23,11 @@ The PID here should be consistent with the PIDs mentioned below, used for servic
 The storage configuration module is mainly used to store gateway proxy configuration information. Currently supports two storage methods:
 
 <CardGroup cols={2}>
-  <Card title="disk storage" icon="folder">
-    Configurations are stored as files on disk, with each configuration as a separate file, similar to nginx vhost
-  </Card>
   <Card title="db storage" icon="database">
     Store in database, each configuration is a record, supports SQLite3, PostgreSQL, MySQL
+  </Card>
+  <Card title="api storage" icon="api">
+    Store configurations through API endpoints, allowing for external configuration management systems
   </Card>
 </CardGroup>
 
@@ -35,7 +35,7 @@ The storage configuration module is mainly used to store gateway proxy configura
 
 ```yaml
 storage:
-  type: "${GATEWAY_STORAGE_TYPE:db}"                    # Storage type: db, disk
+  type: "${GATEWAY_STORAGE_TYPE:db}"                    # Storage type: db, api
 
   # Database configuration (used when type is 'db')
   database:
@@ -47,9 +47,11 @@ storage:
     dbname: "${GATEWAY_DB_NAME:./data/mcp-gateway.db}"  # Database name or file path
     sslmode: "${GATEWAY_DB_SSL_MODE:disable}"           # SSL mode for database connection
 
-  # Disk configuration (used when type is 'disk')
-  disk:
-    path: "${GATEWAY_STORAGE_DISK_PATH:}"               # Data file storage path
+  # API configuration (used when type is 'api')
+  api:
+    url: "${GATEWAY_STORAGE_API_URL:}"                  # API endpoint URL
+    configJSONPath: "${GATEWAY_STORAGE_API_CONFIG_JSON_PATH:}"  # JSON path for config in API response
+    timeout: "${GATEWAY_STORAGE_API_TIMEOUT:30s}"       # Request timeout
 ```
 
 ## Notification Configuration
