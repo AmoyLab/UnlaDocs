@@ -1,0 +1,228 @@
+---
+title: "OAuth Login Configuration"
+description: "Detailed guide for configuring Google and GitHub OAuth login functionality"
+---
+
+## Overview
+
+Unla supports user login through third-party OAuth services, currently supporting `Google` and `GitHub` login methods. Users can quickly log in to the Unla Web interface using their existing Google or GitHub accounts without needing to register separately.
+
+<CardGroup cols={2}>
+  <Card title="Google Login" icon="google">
+    Quick login using Google account
+  </Card>
+  <Card title="GitHub Login" icon="github">
+    Quick login using GitHub account
+  </Card>
+</CardGroup>
+
+## Prerequisites
+
+Before configuring OAuth login, you need to create OAuth applications with the respective service providers:
+
+<Steps>
+  <Step title="Google Cloud Console">
+    Create OAuth 2.0 client ID in Google Cloud Console
+  </Step>
+  <Step title="GitHub Settings">
+    Create OAuth application in GitHub
+  </Step>
+  <Step title="Configure Callback URLs">
+    Configure correct callback URLs for each OAuth application
+  </Step>
+</Steps>
+
+## Google OAuth Configuration
+
+### 1. Create Google OAuth Application
+
+<Steps>
+  <Step title="Access Google Cloud Console">
+    Visit [Google Cloud Console](https://console.cloud.google.com/) and log in to your account
+  </Step>
+  <Step title="Create or Select Project">
+    Create a new project or select an existing project
+  </Step>
+  <Step title="Enable Google+ API">
+    Enable Google+ API in APIs & Services
+  </Step>
+  <Step title="Create OAuth Client ID">
+    Create OAuth 2.0 client ID in the Credentials page, select "Web application" type
+  </Step>
+  <Step title="Configure Authorization Callback URL">
+    Add to "Authorized redirect URIs":
+    ```
+    https://your-domain.com/api/auth/google/callback
+    ```
+  </Step>
+</Steps>
+
+### 2. Obtain Credentials
+
+After creation, you will get:
+- **Client ID**: Used for `client_id` configuration
+- **Client Secret**: Used for `client_secret` configuration
+
+### 3. Configure apiserver.yaml
+
+Add Google OAuth configuration to the `apiserver.yaml` configuration file:
+
+```yaml
+oauth:
+  google:
+    client_id: "your-google-client-id.apps.googleusercontent.com"
+    client_secret: "your-google-client-secret"
+```
+
+<Tip>
+It's recommended to use environment variables to manage sensitive information:
+
+```yaml
+oauth:
+  google:
+    client_id: "${OAUTH_GOOGLE_CLIENT_ID:}"
+    client_secret: "${OAUTH_GOOGLE_CLIENT_SECRET:}"
+```
+</Tip>
+
+## GitHub OAuth Configuration
+
+### 1. Create GitHub OAuth Application
+
+<Steps>
+  <Step title="Access GitHub Settings">
+    Go to GitHub Settings → Developer settings → OAuth Apps
+  </Step>
+  <Step title="Create New Application">
+    Click "New OAuth App" to create a new OAuth application
+  </Step>
+  <Step title="Fill Application Information">
+    - **Application name**: Unla Web
+    - **Homepage URL**: https://your-domain.com
+    - **Authorization callback URL**: https://your-domain.com/api/auth/github/callback
+  </Step>
+  <Step title="Register Application">
+    Click "Register application" to complete creation
+  </Step>
+</Steps>
+
+### 2. Obtain Credentials
+
+After creation, you will get:
+- **Client ID**: Used for `client_id` configuration
+- **Client Secret**: Need to generate, used for `client_secret` configuration
+
+### 3. Configure apiserver.yaml
+
+Add GitHub OAuth configuration to the `apiserver.yaml` configuration file:
+
+```yaml
+oauth:
+  github:
+    client_id: "your-github-client-id"
+    client_secret: "your-github-client-secret"
+```
+
+<Tip>
+It's recommended to use environment variables to manage sensitive information:
+
+```yaml
+oauth:
+  github:
+    client_id: "${OAUTH_GITHUB_CLIENT_ID:}"
+    client_secret: "${OAUTH_GITHUB_CLIENT_SECRET:}"
+```
+</Tip>
+
+## Complete Configuration Example
+
+Here's a complete OAuth configuration example:
+
+```yaml
+oauth:
+  # Google OAuth Configuration
+  google:
+    client_id: "${OAUTH_GOOGLE_CLIENT_ID:}"
+    client_secret: "${OAUTH_GOOGLE_CLIENT_SECRET:}"
+
+  # GitHub OAuth Configuration
+  github:
+    client_id: "${OAUTH_GITHUB_CLIENT_ID:}"
+    client_secret: "${OAUTH_GITHUB_CLIENT_SECRET:}"
+
+# Corresponding environment variable configuration (.env file)
+# OAUTH_GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+# OAUTH_GOOGLE_CLIENT_SECRET=your-google-client-secret
+# OAUTH_GITHUB_CLIENT_ID=your-github-client-id
+# OAUTH_GITHUB_CLIENT_SECRET=your-github-client-secret
+```
+
+## Callback URL Configuration
+
+Ensure correct callback URLs are configured in the OAuth applications:
+
+<CodeGroup>
+```bash Google OAuth Callback URL
+https://your-domain.com/api/auth/google/callback
+```
+
+```bash GitHub OAuth Callback URL
+https://your-domain.com/api/auth/github/callback
+```
+</CodeGroup>
+
+<Warning>
+**Important Notes**:
+- Callback URLs must match your deployed Unla service domain
+- Use HTTPS in production environments
+- Don't hardcode sensitive information in code, use environment variables
+</Warning>
+
+## Features
+
+### Automatic Account Creation
+
+- Users logging in via OAuth for the first time will have accounts created automatically
+- User information (username, email, avatar) will be synced from the OAuth provider
+- Subsequent logins will automatically link to the created account
+
+### Account Association
+
+- Supports multiple login methods coexisting (local accounts + OAuth)
+- Users can use both local password and OAuth login
+- Administrator account functionality is unaffected
+
+### Security
+
+- All OAuth processes follow standard OAuth 2.0 protocol
+- Sensitive information (like access tokens) is only processed server-side
+- Supports HTTPS encrypted transmission
+
+## FAQ
+
+<AccordionGroup>
+  <Accordion title="OAuth login options not showing">
+    Check if `client_id` and `client_secret` are properly configured. Login options only appear when the corresponding parameters are configured.
+  </Accordion>
+
+  <Accordion title="Callback errors or unable to login">
+    Ensure the callback URL configured in the OAuth application matches the actual deployed domain, including protocol (http/https) and port.
+  </Accordion>
+
+  <Accordion title="User information sync issues">
+    User information is automatically synced on first login. For re-sync, contact administrator or re-login.
+  </Accordion>
+
+  <Accordion title="How to disable OAuth login">
+    Delete or comment out the corresponding OAuth configuration in `apiserver.yaml` to disable the respective login option.
+  </Accordion>
+</AccordionGroup>
+
+## Environment Variable Reference
+
+| Variable Name | Description | Example |
+|---------------|-------------|---------|
+| `OAUTH_GOOGLE_CLIENT_ID` | Google OAuth Client ID | `123456789.apps.googleusercontent.com` |
+| `OAUTH_GOOGLE_CLIENT_SECRET` | Google OAuth Client Secret | `GOCSPX-abc123def456` |
+| `OAUTH_GITHUB_CLIENT_ID` | GitHub OAuth Client ID | `Iv1.abc123def456` |
+| `OAUTH_GITHUB_CLIENT_SECRET` | GitHub OAuth Client Secret | `abc123def456ghi789` |

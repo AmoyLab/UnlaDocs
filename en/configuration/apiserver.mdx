@@ -224,6 +224,38 @@ jwt:
 **Strongly recommend using strong passwords in production or public network environments!**
 </Warning>
 
+## OAuth Login Configuration
+
+OAuth configuration enables third-party login functionality, currently supporting `Google` and `GitHub` login. When the corresponding `client_id` and `client_secret` are configured, the web interface will automatically enable OAuth login options.
+
+```yaml
+oauth:
+  # Google OAuth Configuration
+  google:
+    client_id: "${OAUTH_GOOGLE_CLIENT_ID:}"                    # Google OAuth Client ID
+    client_secret: "${OAUTH_GOOGLE_CLIENT_SECRET:}"            # Google OAuth Client Secret
+
+  # GitHub OAuth Configuration
+  github:
+    client_id: "${OAUTH_GITHUB_CLIENT_ID:}"                    # GitHub OAuth Client ID
+    client_secret: "${OAUTH_GITHUB_CLIENT_SECRET:}"            # GitHub OAuth Client Secret
+```
+
+<CardGroup cols={2}>
+  <Card title="Google Login" icon="google">
+    Supports Google account login, requires OAuth app configuration in Google Cloud Console
+  </Card>
+  <Card title="GitHub Login" icon="github">
+    Supports GitHub account login, requires creating an OAuth app in GitHub
+  </Card>
+</CardGroup>
+
+<Note>
+- OAuth login options are only enabled when the corresponding `client_id` and `client_secret` are configured
+- OAuth login can be used alongside local account login
+- Users logging in via OAuth for the first time will have accounts created automatically
+</Note>
+
 ## Configuration File Location
 
 By default, the configuration file should be placed in the following locations:

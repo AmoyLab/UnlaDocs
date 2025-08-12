@@ -224,6 +224,38 @@ jwt:
 **强烈建议生产环境或者公网环境使用强密码！**
 </Warning>
 
+## OAuth 登录配置
+
+OAuth 配置用于支持第三方登录功能，目前支持 `Google` 和 `GitHub` 登录。配置了对应的 `client_id` 和 `client_secret` 后，Web 界面会自动启用 OAuth 登录选项。
+
+```yaml
+oauth:
+  # Google OAuth 配置
+  google:
+    client_id: "${OAUTH_GOOGLE_CLIENT_ID:}"                    # Google OAuth Client ID
+    client_secret: "${OAUTH_GOOGLE_CLIENT_SECRET:}"            # Google OAuth Client Secret
+
+  # GitHub OAuth 配置
+  github:
+    client_id: "${OAUTH_GITHUB_CLIENT_ID:}"                    # GitHub OAuth Client ID
+    client_secret: "${OAUTH_GITHUB_CLIENT_SECRET:}"            # GitHub OAuth Client Secret
+```
+
+<CardGroup cols={2}>
+  <Card title="Google 登录" icon="google">
+    支持 Google 账户登录，需要在 Google Cloud Console 配置 OAuth 应用
+  </Card>
+  <Card title="GitHub 登录" icon="github">
+    支持 GitHub 账户登录，需要在 GitHub 创建 OAuth 应用
+  </Card>
+</CardGroup>
+
+<Note>
+- 只有配置了对应的 `client_id` 和 `client_secret` 才会启用相应的 OAuth 登录选项
+- OAuth 登录与本地账户登录可以同时使用
+- 首次通过 OAuth 登录的用户会自动创建账户
+</Note>
+
 ## 配置文件位置
 
 默认情况下，配置文件应放置在以下位置：

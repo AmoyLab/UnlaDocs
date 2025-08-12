@@ -1,0 +1,228 @@
+---
+title: "OAuth 登录配置"
+description: "配置 Google 和 GitHub OAuth 登录功能的详细指南"
+---
+
+## 概述
+
+Unla 支持通过第三方 OAuth 服务进行用户登录，目前支持 Google 和 GitHub 两种登录方式。用户可以使用他们现有的 Google 或 GitHub 账户快速登录 Unla Web 界面，无需单独注册账户。
+
+<CardGroup cols={2}>
+  <Card title="Google 登录" icon="google">
+    使用 Google 账户进行快速登录
+  </Card>
+  <Card title="GitHub 登录" icon="github">
+    使用 GitHub 账户进行快速登录
+  </Card>
+</CardGroup>
+
+## 前置要求
+
+在配置 OAuth 登录之前，您需要在相应的服务提供商处创建 OAuth 应用：
+
+<Steps>
+  <Step title="Google Cloud Console">
+    在 Google Cloud Console 创建 OAuth 2.0 客户端 ID
+  </Step>
+  <Step title="GitHub Settings">
+    在 GitHub 创建 OAuth 应用
+  </Step>
+  <Step title="配置回调 URL">
+    为每个 OAuth 应用配置正确的回调 URL
+  </Step>
+</Steps>
+
+## Google OAuth 配置
+
+### 1. 创建 Google OAuth 应用
+
+<Steps>
+  <Step title="访问 Google Cloud Console">
+    前往 [Google Cloud Console](https://console.cloud.google.com/) 并登录您的账户
+  </Step>
+  <Step title="创建或选择项目">
+    创建新项目或选择现有项目
+  </Step>
+  <Step title="启用 Google+ API">
+    在 APIs & Services 中启用 Google+ API
+  </Step>
+  <Step title="创建 OAuth 客户端 ID">
+    在 Credentials 页面创建 OAuth 2.0 客户端 ID，选择 "Web application" 类型
+  </Step>
+  <Step title="配置授权回调 URL">
+    在 "Authorized redirect URIs" 中添加：
+    ```
+    https://your-domain.com/api/auth/google/callback
+    ```
+  </Step>
+</Steps>
+
+### 2. 获取凭据信息
+
+创建完成后，您将获得：
+- **Client ID**: 用于 `client_id` 配置
+- **Client Secret**: 用于 `client_secret` 配置
+
+### 3. 配置 apiserver.yaml
+
+在 `apiserver.yaml` 配置文件中添加 Google OAuth 配置：
+
+```yaml
+oauth:
+  google:
+    client_id: "your-google-client-id.apps.googleusercontent.com"
+    client_secret: "your-google-client-secret"
+```
+
+<Tip>
+建议使用环境变量来管理敏感信息：
+
+```yaml
+oauth:
+  google:
+    client_id: "${OAUTH_GOOGLE_CLIENT_ID:}"
+    client_secret: "${OAUTH_GOOGLE_CLIENT_SECRET:}"
+```
+</Tip>
+
+## GitHub OAuth 配置
+
+### 1. 创建 GitHub OAuth 应用
+
+<Steps>
+  <Step title="访问 GitHub Settings">
+    前往 GitHub Settings → Developer settings → OAuth Apps
+  </Step>
+  <Step title="创建新应用">
+    点击 "New OAuth App" 创建新的 OAuth 应用
+  </Step>
+  <Step title="填写应用信息">
+    - **Application name**: Unla Web
+    - **Homepage URL**: https://your-domain.com
+    - **Authorization callback URL**: https://your-domain.com/api/auth/github/callback
+  </Step>
+  <Step title="注册应用">
+    点击 "Register application" 完成创建
+  </Step>
+</Steps>
+
+### 2. 获取凭据信息
+
+创建完成后，您将获得：
+- **Client ID**: 用于 `client_id` 配置
+- **Client Secret**: 需要生成，用于 `client_secret` 配置
+
+### 3. 配置 apiserver.yaml
+
+在 `apiserver.yaml` 配置文件中添加 GitHub OAuth 配置：
+
+```yaml
+oauth:
+  github:
+    client_id: "your-github-client-id"
+    client_secret: "your-github-client-secret"
+```
+
+<Tip>
+建议使用环境变量来管理敏感信息：
+
+```yaml
+oauth:
+  github:
+    client_id: "${OAUTH_GITHUB_CLIENT_ID:}"
+    client_secret: "${OAUTH_GITHUB_CLIENT_SECRET:}"
+```
+</Tip>
+
+## 完整配置示例
+
+以下是完整的 OAuth 配置示例：
+
+```yaml
+oauth:
+  # Google OAuth 配置
+  google:
+    client_id: "${OAUTH_GOOGLE_CLIENT_ID:}"
+    client_secret: "${OAUTH_GOOGLE_CLIENT_SECRET:}"
+    
+  # GitHub OAuth 配置
+  github:
+    client_id: "${OAUTH_GITHUB_CLIENT_ID:}"
+    client_secret: "${OAUTH_GITHUB_CLIENT_SECRET:}"
+
+# 对应的环境变量配置 (.env 文件)
+# OAUTH_GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+# OAUTH_GOOGLE_CLIENT_SECRET=your-google-client-secret
+# OAUTH_GITHUB_CLIENT_ID=your-github-client-id
+# OAUTH_GITHUB_CLIENT_SECRET=your-github-client-secret
+```
+
+## 回调 URL 配置
+
+确保在 OAuth 应用中配置正确的回调 URL：
+
+<CodeGroup>
+```bash Google OAuth 回调 URL
+https://your-domain.com/api/auth/google/callback
+```
+
+```bash GitHub OAuth 回调 URL
+https://your-domain.com/api/auth/github/callback
+```
+</CodeGroup>
+
+<Warning>
+**重要提示**：
+- 回调 URL 必须与您部署的 Unla 服务域名一致
+- 在生产环境中使用 HTTPS
+- 不要在代码中硬编码敏感信息，使用环境变量
+</Warning>
+
+## 功能特性
+
+### 自动账户创建
+
+- 用户首次通过 OAuth 登录时，系统会自动创建对应的用户账户
+- 用户信息（如用户名、邮箱、头像）会从 OAuth 提供商同步
+- 后续登录会自动关联到已创建的账户
+
+### 账户关联
+
+- 支持多种登录方式并存（本地账户 + OAuth）
+- 用户可以同时使用本地密码和 OAuth 登录
+- 管理员账户功能不受影响
+
+### 安全性
+
+- 所有 OAuth 流程遵循标准的 OAuth 2.0 协议
+- 敏感信息（如 access token）仅在服务器端处理
+- 支持 HTTPS 加密传输
+
+## 常见问题
+
+<AccordionGroup>
+  <Accordion title="OAuth 登录选项没有显示">
+    检查是否正确配置了 `client_id` 和 `client_secret`，只有配置了相应参数才会显示对应的登录选项。
+  </Accordion>
+
+  <Accordion title="回调错误或无法登录">
+    确保在 OAuth 应用中配置的回调 URL 与实际部署的域名一致，包括协议（http/https）和端口。
+  </Accordion>
+
+  <Accordion title="用户信息同步问题">
+    首次登录时用户信息会自动同步，如需重新同步，请联系管理员或重新登录。
+  </Accordion>
+
+  <Accordion title="如何禁用 OAuth 登录">
+    删除或注释掉 `apiserver.yaml` 中对应的 OAuth 配置即可禁用相应的登录选项。
+  </Accordion>
+</AccordionGroup>
+
+## 环境变量参考
+
+| 变量名 | 说明 | 示例 |
+|--------|------|------|
+| `OAUTH_GOOGLE_CLIENT_ID` | Google OAuth Client ID | `123456789.apps.googleusercontent.com` |
+| `OAUTH_GOOGLE_CLIENT_SECRET` | Google OAuth Client Secret | `GOCSPX-abc123def456` |
+| `OAUTH_GITHUB_CLIENT_ID` | GitHub OAuth Client ID | `Iv1.abc123def456` |
+| `OAUTH_GITHUB_CLIENT_SECRET` | GitHub OAuth Client Secret | `abc123def456ghi789` |
