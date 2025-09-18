@@ -143,6 +143,81 @@ requestBody: |-
 Here, `settings` is a complex object. Using the `toJSON` function will automatically convert `settings` to a JSON string.
 </Tip>
 
+### 9. Safely Access Nested Fields (safeGet/safeGetOr)
+
+When a middle level of a nested object is `null` (or missing), direct access will cause a template rendering error. For example:
+
+```yaml
+responseBody: |-
+  {
+    "id": "{{.Response.Data.id}}",
+    "username": "{{.Response.Data.username}}",
+    "email": "{{.Response.Data.email}}",
+    "createdAt": "{{.Response.Data.createdAt}}",
+    "theme": "{{.Response.Data.preferences.theme}}"  # Will error if preferences is null
+  }
+```
+
+To address this, two functions are added: `safeGet` and `safeGetOr`.
+
+- `safeGet <path> <root>`: Safely reads a nested field; if any middle level is `nil`/missing, returns an empty value (no error).
+- `safeGetOr <path> <root> <default>`: Like `safeGet`, but returns `<default>` when access fails.
+
+Example data (normal):
+
+```json
+{
+  "id": "28050608-7f39-42cf-be06-4982135dada9",
+  "username": "2",
+  "email": "1",
+  "createdAt": "2025-09-12T11:43:16.086506+08:00",
+  "preferences": {
+    "isPublic": false,
+    "showEmail": true,
+    "theme": "light",
+    "tags": [],
+    "settings": {},
+    "notifications": []
+  }
+}
+```
+
+When `preferences` is `null`:
+
+```json
+{
+  "id": "28050608-7f39-42cf-be06-4982135dada9",
+  "username": "2",
+  "email": "1",
+  "createdAt": "2025-09-12T11:43:16.086506+08:00",
+  "preferences": null
+}
+```
+
+Then:
+
+```yaml
+# Using safeGet: no error, renders as empty (<no value>)
+responseBody: |-
+  {
+    "id": "{{.Response.Data.id}}",
+    "username": "{{.Response.Data.username}}",
+    "email": "{{.Response.Data.email}}",
+    "createdAt": "{{.Response.Data.createdAt}}",
+    "theme": "{{ safeGet "Response.Data.preferences.theme" . }}"
+  }
+
+# Using safeGetOr: provide a default value
+responseBody: |-
+  {
+    "id": "{{.Response.Data.id}}",
+    "username": "{{.Response.Data.username}}",
+    "email": "{{.Response.Data.email}}",
+    "createdAt": "{{.Response.Data.createdAt}}",
+    "theme": "{{ safeGetOr "Response.Data.preferences.theme" . "light" }}"
+  }
+```
+
 ## Built-in Functions
 
 Currently supports the following built-in functions:
@@ -175,6 +250,20 @@ Currently supports the following built-in functions:
     "settings": {{ toJSON .Args.settings }}
     ```
   </Accordion>
+
+  <Accordion icon="shield" title="safeGet - Safe Field Access">
+    Safely read nested fields; if any middle level is `nil` or missing, return an empty value without error.
+    ```yaml
+    {{ safeGet "Response.Data.preferences.theme" . }}
+    ```
+  </Accordion>
+
+  <Accordion icon="shield" title="safeGetOr - Safe Access with Default">
+    Like `safeGet`, but returns a default value when access fails.
+    ```yaml
+    {{ safeGetOr "Response.Data.preferences.theme" . "light" }}
+    ```
+  </Accordion>
 </AccordionGroup>
 
 ## Template Debugging Tips
@@ -200,13 +289,13 @@ Currently supports the following built-in functions:
     - Properly validate and escape user input
   </Accordion>
 
-  <Accordion icon="zap" title="Performance">
+  <Accordion icon="play" title="Performance">
     - Avoid complex calculations in templates
     - Use caching mechanisms appropriately
     - For large data processing, consider preprocessing in upstream services
   </Accordion>
 
-  <Accordion icon="tools" title="Maintainability">
+  <Accordion icon="gear" title="Maintainability">
     - Keep templates concise and clear
     - Add appropriate comments and explanations
     - Use meaningful variable names
