@@ -277,6 +277,96 @@ FORWARD_HEADER_OVERRIDE_EXISTING=false
 When enabling forward headers in production, carefully review which headers should be forwarded to avoid security risks such as exposing sensitive authentication tokens or cookies.
 </Warning>
 
+## Tracing (OpenTelemetry → Jaeger)
+
+MCP Gateway supports distributed tracing via OpenTelemetry and exports to Jaeger. This is optional and disabled by default.
+
+### What You Get
+
+- Inbound HTTP requests are traced via Gin instrumentation (health check is excluded)
+- Downstream HTTP calls propagate trace context automatically
+- Optional capture of downstream request fields/body and error previews for faster debugging
+
+### Configuration
+
+```yaml
+tracing:
+  enabled: ${TRACING_ENABLED:false}
+  service_name: "${TRACING_SERVICE_NAME:mcp-gateway}"
+  endpoint: "${TRACING_ENDPOINT:localhost:4317}"   # Jaeger OTLP collector: gRPC(4317) or HTTP(4318)
+  protocol: "${TRACING_PROTOCOL:grpc}"             # grpc or http
+  insecure: ${TRACING_INSECURE:true}
+  sampler_rate: ${TRACING_SAMPLER_RATE:0.1}         # 0.0 ~ 1.0
+  environment: "${TRACING_ENV:dev}"
+  headers: {}                                       # optional exporter headers
+  capture:
+    downstream_error:
+      enabled: ${TRACING_ERR_BODY_ENABLED:false}
+      max_body_length: ${TRACING_ERR_BODY_MAX_LEN:256}
+    # GLOBAL capture settings — use with care to avoid leaking secrets.
+    downstream_request:
+      enabled: ${TRACING_REQ_ARGS_ENABLED:false}
+      body_enabled: ${TRACING_REQ_BODY_ENABLED:false}
+      body_max_length: ${TRACING_REQ_BODY_MAX_LEN:256}
+      max_field_length: ${TRACING_REQ_ARG_MAX_LEN:256}
+      include_fields: "${TRACING_INCLUDE_FIELDS:}"   # CSV or JSON map of key=template
+```
+
+### Environment Variables
+
+```bash
+# Enable tracing and set service metadata
+TRACING_ENABLED=true
+TRACING_SERVICE_NAME=mcp-gateway
+TRACING_ENV=dev
+
+# Exporter options (choose one protocol)
+TRACING_PROTOCOL=grpc
+TRACING_ENDPOINT=localhost:4317   # for gRPC (OTLP)
+# OR
+# TRACING_PROTOCOL=http
+# TRACING_ENDPOINT=http://localhost:4318  # for HTTP (OTLP)
+TRACING_INSECURE=true
+TRACING_SAMPLER_RATE=1.0          # 1.0 for dev; lower in prod
+
+# Optional capture controls (use cautiously in prod)
+TRACING_ERR_BODY_ENABLED=true
+TRACING_ERR_BODY_MAX_LEN=256
+TRACING_REQ_ARGS_ENABLED=false
+TRACING_INCLUDE_FIELDS="username={{.Args.username}},email={{.Args.email}}"
+TRACING_REQ_ARG_MAX_LEN=256
+TRACING_REQ_BODY_ENABLED=false
+TRACING_REQ_BODY_MAX_LEN=256
+```
+
+### Local Jaeger
+
+- Use the provided compose file to start Jaeger locally: `deploy/docker/jaeger/docker-compose.yml`
+- Command: `docker compose -f deploy/docker/jaeger/docker-compose.yml up`
+- Jaeger UI: http://localhost:16686
+
+### Screenshots
+
+<img
+  className="block dark:hidden"
+  src="/images/trace.client.light.png"
+  alt="Client request example (light)"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/trace.client.dark.png"
+  alt="Client request example (dark)"
+/>
+
+<img
+  src="/images/trace.jaeger.png"
+  alt="Jaeger UI – trace result overview"
+/>
+
+<Warning>
+Capturing request fields or bodies can expose sensitive data (tokens, passwords, PII). Keep disabled by default, use minimal sampling and narrow field selection in controlled environments.
+</Warning>
+
 ## Configuration File Location
 
 By default, configuration files should be placed in the following locations:

@@ -277,6 +277,96 @@ FORWARD_HEADER_OVERRIDE_EXISTING=false
 在生产环境中启用 forward headers 时，请仔细审查应该转发哪些头部，以避免安全风险，如暴露敏感的身份验证令牌或 cookies。
 </Warning>
 
+## 链路追踪（OpenTelemetry → Jaeger）
+
+MCP Gateway 支持通过 OpenTelemetry 将链路追踪数据导出到 Jaeger。该功能可选，默认关闭。
+
+### 功能概览
+
+- 入站 HTTP 请求通过 Gin 中间件自动打点（排除 /health_check）
+- 下游 HTTP 调用自动透传 Trace 上下文
+- 可选捕获下游请求的部分字段/Body 以及错误响应摘要，便于排障
+
+### 配置示例
+
+```yaml
+tracing:
+  enabled: ${TRACING_ENABLED:false}
+  service_name: "${TRACING_SERVICE_NAME:mcp-gateway}"
+  endpoint: "${TRACING_ENDPOINT:localhost:4317}"   # Jaeger OTLP 采集端：gRPC(4317) 或 HTTP(4318)
+  protocol: "${TRACING_PROTOCOL:grpc}"             # grpc 或 http
+  insecure: ${TRACING_INSECURE:true}
+  sampler_rate: ${TRACING_SAMPLER_RATE:0.1}         # 0.0 ~ 1.0
+  environment: "${TRACING_ENV:dev}"
+  headers: {}                                       # 可选导出器请求头
+  capture:
+    downstream_error:
+      enabled: ${TRACING_ERR_BODY_ENABLED:false}
+      max_body_length: ${TRACING_ERR_BODY_MAX_LEN:256}
+    # 全局抓取设置 — 谨慎使用，避免泄露敏感信息。
+    downstream_request:
+      enabled: ${TRACING_REQ_ARGS_ENABLED:false}
+      body_enabled: ${TRACING_REQ_BODY_ENABLED:false}
+      body_max_length: ${TRACING_REQ_BODY_MAX_LEN:256}
+      max_field_length: ${TRACING_REQ_ARG_MAX_LEN:256}
+      include_fields: "${TRACING_INCLUDE_FIELDS:}"   # CSV 或 JSON Map: key=模板
+```
+
+### 环境变量
+
+```bash
+# 启用追踪与服务标识
+TRACING_ENABLED=true
+TRACING_SERVICE_NAME=mcp-gateway
+TRACING_ENV=dev
+
+# 导出器配置（二选一协议）
+TRACING_PROTOCOL=grpc
+TRACING_ENDPOINT=localhost:4317   # gRPC（OTLP）
+# 或者：
+# TRACING_PROTOCOL=http
+# TRACING_ENDPOINT=http://localhost:4318  # HTTP（OTLP）
+TRACING_INSECURE=true
+TRACING_SAMPLER_RATE=1.0          # 开发建议 1.0；生产请适当降低
+
+# 可选捕获项（生产慎用）
+TRACING_ERR_BODY_ENABLED=true
+TRACING_ERR_BODY_MAX_LEN=256
+TRACING_REQ_ARGS_ENABLED=false
+TRACING_INCLUDE_FIELDS="username={{.Args.username}},email={{.Args.email}}"
+TRACING_REQ_ARG_MAX_LEN=256
+TRACING_REQ_BODY_ENABLED=false
+TRACING_REQ_BODY_MAX_LEN=256
+```
+
+### 本地启动 Jaeger
+
+- 可使用项目内提供的 Compose 文件：`deploy/docker/jaeger/docker-compose.yml`
+- 启动命令：`docker compose -f deploy/docker/jaeger/docker-compose.yml up`
+- Jaeger UI: http://localhost:16686
+
+### 示例截图
+
+<img
+  className="block dark:hidden"
+  src="/images/trace.client.light.png"
+  alt="客户端请求示例（浅色主题）"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/trace.client.dark.png"
+  alt="客户端请求示例（深色主题）"
+/>
+
+<img
+  src="/images/trace.jaeger.png"
+  alt="Jaeger UI —— Trace 结果展示"
+/>
+
+<Warning>
+开启字段或 Body 捕获可能会暴露敏感信息（令牌、密码、个人隐私）。建议默认关闭，在受控环境内以最小化采样与精确字段选择的方式使用。
+</Warning>
+
 ## 配置文件位置
 
 默认情况下，配置文件应放置在以下位置：
