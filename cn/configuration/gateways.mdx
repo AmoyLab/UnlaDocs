@@ -355,6 +355,64 @@ servers:
 
 当使用 `form-data` 作为参数位置时，不需要指定 `requestBody`，系统会自动将参数组装成 multipart/form-data 格式。
 
+另外：`header` 和 `query` 参数也会被自动注入到下游请求中（Header 的键名等于参数名，Query 以 URL 查询字符串形式追加）。例如：
+
+```yaml
+args:
+  - name: "username"   # 发送 Header: Username: <值>
+    position: "header"
+  - name: "traceId"    # URL 追加 ?traceId=<值>
+    position: "query"
+```
+
+<CardGroup cols={3}>
+  <Card title="Client（MCP 请求）" icon="terminal">
+    请求 arguments 示例（来自 MCP 客户端）：
+    ```json
+    {
+      "username": "alice",
+      "traceId": "t-123",
+      "avatarUrl": "https://img.example.com/1.png"
+    }
+    ```
+  </Card>
+  <Card title="MCP Gateway" icon="api">
+    - `header` 自动写入下游 Header（键名=参数名）
+    - `query` 自动追加到 URL 查询字符串
+    - `form-data` 自动组装 multipart/form-data
+
+    工具配置片段：
+    ```yaml
+    tools:
+      - name: demo
+        method: POST
+        endpoint: http://example.com/api/users
+        args:
+          - name: username   # Header: Username: alice
+            position: header
+          - name: traceId    # URL: ?traceId=t-123
+            position: query
+          - name: avatarUrl  # form field: avatarUrl=...
+            position: form-data
+    ```
+  </Card>
+  <Card title="下游服务（HTTP 请求）" icon="globe">
+    实际发送给下游的请求：
+    ```http
+    POST /api/users?traceId=t-123 HTTP/1.1
+    Host: example.com
+    Username: alice
+    Content-Type: multipart/form-data; boundary=---BOUNDARY
+
+    ---BOUNDARY
+    Content-Disposition: form-data; name="avatarUrl"
+
+    https://img.example.com/1.png
+    ---BOUNDARY--
+    ```
+  </Card>
+</CardGroup>
+
 对于JSON格式的请求体，需要在 `requestBody` 中组装，比如：
 
 ```yaml

@@ -355,6 +355,64 @@ For complex `array` type parameters, detailed element structures can be defined:
 
 When using `form-data` as parameter position, no need to specify `requestBody`, the system will automatically assemble parameters into multipart/form-data format.
 
+Additionally, `header` and `query` parameters are auto-injected into the downstream request (Header key equals the parameter name; Query is appended to the URL). For example:
+
+```yaml
+args:
+  - name: "username"   # Sends header: Username: <value>
+    position: "header"
+  - name: "traceId"    # Appends ?traceId=<value> to URL
+    position: "query"
+```
+
+<CardGroup cols={3}>
+  <Card title="Client (MCP Request)" icon="terminal">
+    Example arguments from MCP client:
+    ```json
+    {
+      "username": "alice",
+      "traceId": "t-123",
+      "avatarUrl": "https://img.example.com/1.png"
+    }
+    ```
+  </Card>
+  <Card title="MCP Gateway" icon="api">
+    - `header` is auto-written to downstream headers (key = param name)
+    - `query` is auto-appended to the URL query string
+    - `form-data` is auto-assembled as multipart/form-data
+
+    Tool config snippet:
+    ```yaml
+    tools:
+      - name: demo
+        method: POST
+        endpoint: http://example.com/api/users
+        args:
+          - name: username   # Header: Username: alice
+            position: header
+          - name: traceId    # URL: ?traceId=t-123
+            position: query
+          - name: avatarUrl  # form field: avatarUrl=...
+            position: form-data
+    ```
+  </Card>
+  <Card title="Downstream Service (HTTP Request)" icon="globe">
+    Actual request sent to downstream:
+    ```http
+    POST /api/users?traceId=t-123 HTTP/1.1
+    Host: example.com
+    Username: alice
+    Content-Type: multipart/form-data; boundary=---BOUNDARY
+
+    ---BOUNDARY
+    Content-Disposition: form-data; name="avatarUrl"
+
+    https://img.example.com/1.png
+    ---BOUNDARY--
+    ```
+  </Card>
+</CardGroup>
+
 For JSON format request body, assembly is needed in `requestBody`, for example:
 
 ```yaml
