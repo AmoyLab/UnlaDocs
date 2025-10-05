@@ -1,0 +1,41 @@
+---
+title: "API Server 設定說明"
+description: "apiserver.yaml 設定檔詳細解釋"
+---
+
+設定檔支援以 `${VAR:default}` 語法從環境變數讀取，若未設置相關環境變數則會使用預設值。
+
+常見作法是利用多個 `.env`、`.env.development`、`.env.prod` 等檔案注入參數，你也可以直接修改設定檔內容（硬編碼）來指定值。
+
+## 日誌（Logging）設定
+
+日誌設定可控制應用程式的日誌輸出行為：
+
+```yaml
+logger:
+  level: "${APISERVER_LOGGER_LEVEL:info}"                                         # 日誌等級：debug、info、warn、error
+  format: "${APISERVER_LOGGER_FORMAT:console}"                                    # 日誌格式：json, console
+  output: "${APISERVER_LOGGER_OUTPUT:stdout}"                                     # 輸出方式：stdout、file
+  file_path: "${APISERVER_LOGGER_FILE_PATH:/var/log/unla/apiserver.log}"          # 日誌檔案路徑（output 設 file 時）
+  max_size: ${APISERVER_LOGGER_MAX_SIZE:100}                                      # 單一日誌檔案最大容量（MB）
+  max_backups: ${APISERVER_LOGGER_MAX_BACKUPS:3}                                  # 保留的備份檔案數
+  max_age: ${APISERVER_LOGGER_MAX_AGE:7}                                          # 備份檔案保存天數
+  compress: ${APISERVER_LOGGER_COMPRESS:true}                                     # 是否壓縮備份檔案
+  color: ${APISERVER_LOGGER_COLOR:true}                                           # 主控台輸出是否使用顏色
+  stacktrace: ${APISERVER_LOGGER_STACKTRACE:true}                                 # 錯誤日誌是否包含 stack trace
+```
+
+<CardGroup cols={2}>
+  <Card title="日誌等級" icon="chart-line">
+    支援四種等級：debug、info、warn、error
+  </Card>
+  <Card title="輸出格式" icon="file-text">
+    支援 JSON 結構化輸出與主控台易讀格式
+  </Card>
+  <Card title="自動輪換" icon="refresh">
+    自動控管日誌檔案大小與數量
+  </Card>
+  <Card title="Stack Trace" icon="bug">
+    錯誤記錄可包含詳細呼叫堆疊資訊
+  </Card>
+</CardGroup>

@@ -1,0 +1,40 @@
+---
+title: '全域設定'
+description: 'Mintlify 讓你可完全自訂文件風格，核心設定在 docs.json 檔'
+icon: 'gear'
+---
+
+每個 Mintlify 站台都需要一個 `docs.json` 檔，包含主要設定。請參考下方[屬性](#properties)說明。
+
+## 屬性
+
+<ResponseField name="name" type="string" required>
+專案名稱。用於整體標題顯示。
+
+範例：`mintlify`
+
+</ResponseField>
+
+<ResponseField name="navigation" type="Navigation[]" required>
+  一組分頁分組陣列，包含所有頁面
+  <Expandable title="Navigation">
+    <ResponseField name="group" type="string">
+    分組名稱。
+
+    範例：`Settings`
+
+    </ResponseField>
+    <ResponseField name="pages" type="string[]">
+    指向作為分頁的 markdown 檔案相對路徑。
+
+    範例：`["customization", "page"]`
+
+    </ResponseField>
+
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="logo" type="string or object">
+  Logo 圖片路徑，或物件格式包含「light」與「dark」模式 logo 圖片
+  <Expandable title="Logo">
+    <ResponseField name="light" type="string">

@@ -1,0 +1,39 @@
+---
+title: "閘道代理設定"
+description: "MCP Gateway 代理服務設定詳細教學"
+---
+
+## HTTP 服務代理設定
+
+以下為 HTTP 服務代理常用設定範例，包含路由、工具等設定：
+
+```yaml
+name: "mock-server"              # 代理服務名稱，需全域唯一
+tenant: "default"                # 多租戶情境下的租戶識別碼
+
+# 路由設定
+routers:
+  - server: "mock-server"       # 服務名稱
+    prefix: "/gateway/user"         # 路徑前綴，全域唯一且不可重複，建議依服務或 domain+模組區分
+
+    # CORS 設定
+    cors:
+      allowOrigins:             # 開發或測試環境可完全開放，正式環境請視需求開放（多數 MCP 客戶端不需跨域）
+        - "*"
+      allowMethods:             # 開放請求方式，視需求開放，MCP（SSE/Streamable）通常只需這三種
+        - "GET"
+        - "POST"
+        - "PUT"
+        - "OPTIONS"
+      allowHeaders:
+        - "Content-Type"        # 必須開放
+        - "Authorization"       # 若需驗證則必須支援帶入此鍵
+        - "Mcp-Session-Id"      # MCP 必須支援，否則 Streamable HTTP 不可正常使用
+        - "mcp-protocol-version" # MCP 協定版號協商用 Header
+      exposeHeaders:
+        - "Mcp-Session-Id"      # MCP 有跨域情境時須暴露，否則 Streamable HTTP 不可正常使用
+        - "mcp-protocol-version" # MCP 協定版號 Header
+      allowCredentials: true    # 是否加入 Access-Control-Allow-Credentials: true
+# 服務設定
+servers:
+  - name: "mock-server"         # 服務名稱，需與 routers 中 server 相同

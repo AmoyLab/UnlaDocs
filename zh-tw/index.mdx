@@ -1,0 +1,140 @@
+---
+title: "Unla - MCP 閘道"
+description: "🚀 透過設定，將現有 MCP 服務及 API 轉化為 MCP 相容服務 — 無需修改任何程式碼"
+---
+
+<img
+  className="block dark:hidden"
+  src="/images/Old War Office Building(Urban Architecture),[Leo].20230108.png"
+  alt="MCP Gateway Hero Light"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/Couple in Thames(Lover),[Leo].20231003.png"
+  alt="MCP Gateway Hero Dark"
+/>
+
+## Unla 是什麼？
+
+**Unla** 是以 Go 語言撰寫、輕量且高可用的閘道服務。它可讓個人與組織透過 [MCP 協定](https://modelcontextprotocol.io/) 設定，將既有 MCP 服務及 API 直接轉化為相容服務—無需更動其他程式碼。
+
+<Note>
+⚡ **注意**：Unla 正在高速開發中！我們致力於維持向下相容，但無法保證 100%。升級時請仔細檢查版本異動。由於快速迭代，文件更新可能會略有滯後，如遇問題歡迎在 [Discord](https://discord.gg/udf69cT9TY) 或 [Issues](https://github.com/amoylab/unla/issues) 求助 ❤️
+</Note>
+
+## 🔧 核心設計原則
+
+<CardGroup cols={2}>
+  <Card title="✅ 零侵入" icon="shield-check">
+    跨平台設計，支援裸機、VM、ECS、Kubernetes 部署，無需修改現有基礎架構
+  </Card>
+  <Card title="🔄 設定驅動" icon="gear">
+    以 YAML 設定檔將傳統 API 轉換為 MCP 服務，不需寫任何程式
+  </Card>
+  <Card title="🪶 輕量高效" icon="feather">
+    極低資源使用，效能與可用性兼顧
+  </Card>
+  <Card title="🧭 內建管理介面" icon="browser">
+    隨附網頁介面，簡化部署並減少運維負擔
+  </Card>
+</CardGroup>
+
+## 架構說明
+
+<img
+  className="block dark:hidden"
+  src="/images/architecture.light.svg"
+  alt="Unla Architecture Light"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/architecture.dark.svg"
+  alt="Unla Architecture Hero Dark"
+/>
+
+## 🚀 核心功能
+
+### 🔌 協定與代理功能
+- ✅ 支援將 RESTful API 轉換為 MCP 服務
+- ✅ 支援 MCP 服務代理功能
+- ✅ 支援 MCP SSE
+- ✅ 支援 MCP Streamable HTTP
+- ✅ 支援 MCP 回應格式：文字、圖片、音訊
+- 🔄 gRPC 轉 MCP 服務開發中
+- 🔄 WebSocket 轉 MCP 服務開發中
+
+### 🧠 工作階段與多租戶
+- ✅ 持久且可恢復的會話支援
+- ✅ 多租戶機制
+- 🔄 MCP 服務分組與彙整開發中
+
+### 🛠 設定與管理
+- ✅ 自動抓取設定、熱重載
+- ✅ 設定持久化（支援 SQLite、PostgreSQL、MySQL、API）
+- ✅ 設定同步（可用 OS 訊號、HTTP 或 Redis PubSub）
+- ✅ 設定版本控管
+
+### 🔐 安全與認證
+- ✅ 支援基於 OAuth 的 MCP 服務預認證
+
+### 📦 部署與運維
+- ✅ 支援多副本服務
+- ✅ 支援 Docker
+- ✅ 支援 Kubernetes 與 Helm 部署
+
+<CardGroup cols={2}>
+  <Card
+    title="快速開始"
+    icon="rocket"
+    href="/zh-tw/quickstart"
+  >
+    快速部署與啟動 Unla MCP 閘道服務
+  </Card>
+  <Card
+    title="Docker 部署"
+    icon="docker"
+    href="/zh-tw/deployment/docker"
+  >
+    Docker 容器化部署方案
+  </Card>
+  <Card
+    title="MCP 閘道設定"
+    icon="gear"
+    href="/zh-tw/configuration/mcp-gateway"
+  >
+    MCP 閘道服務參數設定與選項
+  </Card>
+  <Card
+    title="用戶端整合"
+    icon="plug"
+    href="/zh-tw/client-usage/cursor"
+  >
+    與多種 MCP 用戶端無縫對接
+  </Card>
+</CardGroup>
+
+## 🌐 社群與支援
+
+<CardGroup cols={3}>
+  <Card
+    title="Discord 社群"
+    icon="discord"
+    href="https://discord.gg/udf69cT9TY"
+  >
+    加入 Discord，獲得即時支援
+  </Card>
+  <Card
+    title="GitHub Issues"
+    icon="github"
+    href="https://github.com/amoylab/unla/issues"
+  >
+    回報問題與提供功能需求
+  </Card>
+  <Card
+    title="線上文件"
+    icon="book"
+    href="https://docs.unla.amoylab.com/"
+  >
+    查看完整線上說明文件
+  </Card>
+</CardGroup>

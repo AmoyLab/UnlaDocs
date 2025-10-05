@@ -1,0 +1,41 @@
+---
+title: "Cursor 設定指南"
+description: "如何在 Cursor 中設定 MCP 閘道"
+---
+
+<Note>
+詳細 Cursor MCP 設定教學請參閱 [官方 Cursor 文件](https://docs.cursor.com/context/model-context-protocol)
+</Note>
+
+## 設定步驟
+
+以下為最基本的設定示範。請確認已建立相關目錄及檔案：
+
+<Steps>
+  <Step title="建立設定目錄">
+    ```bash
+    mkdir -p .cursor
+    touch .cursor/mcp.json
+    ```
+  </Step>
+
+  <Step title="加入 MCP Server 設定">
+    在 `.cursor/mcp.json` 中加入如下設定；這裡以內建的 mock user service 作測試：
+    ```json
+    {
+      "mcpServers": {
+        "user": {
+          "url": "http://localhost:5235/gateway/user/sse"
+        }
+      }
+    }
+    ```
+  </Step>
+
+  <Step title="啟用 MCP 伺服器">
+    1. 開啟 Cursor 設定
+    2. 在 **MCP** 區塊啟用此 MCP Server
+    3. 啟用後將顯示綠色小圓點
+    4. 並列出可用工具
+  </Step>
+</Steps>

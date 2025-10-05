@@ -1,0 +1,33 @@
+---
+title: 可重用片段
+description: 保持內容同步的自訂可重用片段
+icon: 'recycle'
+---
+
+import SnippetIntro from '/snippets/snippet-intro.mdx';
+
+<SnippetIntro />
+
+## 建立自訂片段
+
+**前置條件**：片段檔案必須建立在 `snippets` 資料夾內。
+
+<Note>
+  任何在 `snippets` 資料夾內的頁面都會被視為片段，不會被渲染成獨立頁面。如需將片段內容展示在獨立頁面，請在其他檔案中 import 並當作元件呼叫。
+</Note>
+
+### 預設匯出
+
+1. 在你的片段檔案撰寫欲重用的內容，可選擇加上 props 變數供調用時填入。
+
+```mdx snippets/my-snippet.mdx
+Hello world! 這是我打算跨頁面重用的內容。今日關鍵字是 {word}。
+```
+
+<Warning>
+  欲重用的內容必須置於 `snippets` 目錄，import 才能正常運作。
+</Warning>
+
+2. 於目標檔案 import 該片段。
+
+```mdx destination-file.mdx

@@ -1,0 +1,40 @@
+---
+title: "Go Template 使用指南"
+description: "在 MCP 閘道中使用 Go Template 處理請求與回應資料"
+---
+
+本文介紹如何在 MCP 閘道中運用 Go Template 處理請求與回應資料。Go Template 提供強大的模板功能，讓我們靈活進行資料轉換及格式化。
+
+## 基本語法
+
+Go Template 以 `{{}}` 作為分隔符，可在其中使用多種函式與變數。於 MCP 閘道中主要會用到以下變數：
+
+<CardGroup cols={2}>
+  <Card title="設定變數" icon="gear">
+    - `.Config`：服務層級設定
+    - `.Args`：請求參數
+  </Card>
+  <Card title="執行時變數" icon="play">
+    - `.Request`：原始請求資料
+    - `.Response`：上游服務回應資料
+  </Card>
+</CardGroup>
+
+## 常見應用場景
+
+### 1. 從環境變數讀取設定
+
+```yaml
+config:
+  Authorization: 'Bearer {{ env "AUTH_TOKEN" }}'  # 從環境變數讀取授權資訊
+```
+
+<Note>
+使用 `env` 函式可安全地從環境變數取得敏感資訊，避免在設定檔中硬編碼。
+</Note>
+
+### 2. 取得請求 Header 中的值
+
+```yaml
+headers:
+  Authorization: "{{.Request.Headers.Authorization}}"   # 傳遞用戶端的 Authorization header

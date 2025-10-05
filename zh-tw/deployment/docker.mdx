@@ -1,0 +1,40 @@
+---
+title: "Docker 部署"
+description: "MCP 閘道 Docker 部署詳細教學"
+---
+
+## 映像檔說明
+
+MCP 閘道支援兩種部署方式：
+
+<CardGroup cols={2}>
+  <Card title="整合式部署" icon="box">
+    所有服務封裝於單一容器，適合單機或本地端部署
+  </Card>
+  <Card title="多容器部署" icon="cubes">
+    每個服務獨立部署，適合正式環境或叢集部署
+  </Card>
+</CardGroup>
+
+### 映像檔來源
+
+映像檔會發佈至以下三個倉庫：
+
+- **Docker Hub**：`docker.io/ifuryst/unla-*`
+- **GitHub Container Registry**：`ghcr.io/amoylab/unla/*`
+- **阿里雲容器倉庫**：`registry.ap-southeast-1.aliyuncs.com/amoylab/unla-*`
+
+<Note>
+GHCR 支援多層目錄，組織架構更清晰。Docker 及阿里雲僅支援單層目錄，因此映像名稱以 `-` 連接。
+</Note>
+
+### 映像標籤
+
+- `latest`：最新版
+- `vX.Y.Z`：指定版本號
+
+<Warning>
+MCP 閘道目前仍在快速迭代中！建議部署時使用版本號標籤，以利穩定性及回溯。
+</Warning>
+
+### 可用映像檔

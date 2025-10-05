@@ -1,0 +1,38 @@
+---
+title: "Kubernetes 部署"
+description: "在 Kubernetes 叢集部署 MCP 閘道"
+---
+
+## 部署概述
+
+MCP 閘道支援在 Kubernetes 叢集部署，適合大規模生產環境。K8s 部署具備以下優勢：
+
+<CardGroup cols={3}>
+  <Card title="高可用性" icon="shield-check">
+    支援多副本部署與自動故障切換
+  </Card>
+  <Card title="彈性擴展" icon="chart-line">
+    可依負載自動調整實例數
+  </Card>
+  <Card title="服務發現" icon="network-wired">
+    自動服務註冊與負載平衡
+  </Card>
+</CardGroup>
+
+## 部署架構
+
+推薦採用微服務架構於 K8s 叢集內部署：
+
+```mermaid
+graph TB
+    LB[負載均衡] --> WEB[Web 前端]
+    LB --> API[API Server]
+    LB --> GW[MCP Gateway]
+
+    API --> DB[PostgreSQL]
+    GW --> DB
+    API --> REDIS[Redis]
+    GW --> REDIS
+
+    subgraph "Kubernetes 叢集"
+        WEB
