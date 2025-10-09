@@ -1,0 +1,41 @@
+---
+title: '圖片與嵌入'
+description: '加入圖片、影片與 HTML 元素'
+icon: 'image'
+---
+
+<img
+  style={{ borderRadius: '0.5rem' }}
+  src="https://mintlify-assets.b-cdn.net/bigbend.jpg"
+/>
+
+## 圖片
+
+### 使用 Markdown
+
+[Markdown 語法](https://www.markdownguide.org/basic-syntax/#images)可用下列方式插入圖片：
+
+```md
+![標題](/path/image.jpg)
+```
+
+注意圖片檔案大小需低於 5MB。否則建議使用 [Cloudinary](https://cloudinary.com/) 或 [S3](https://aws.amazon.com/s3/) 等服務，便於嵌入外部網址。
+
+### 使用嵌入
+
+如需更多自定義，可使用 [embed](/writing-content/embed) 加入圖片：
+
+```html
+<img height="200" src="/path/image.jpg" />
+```
+
+## 嵌入與 HTML 元件
+
+<iframe
+  width="560"
+  height="315"
+  src="https://www.youtube.com/embed/4KzFe50RQkQ"
+  title="YouTube video player"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+></iframe>

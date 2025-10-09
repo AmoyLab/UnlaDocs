@@ -1,0 +1,41 @@
+---
+title: "本地開發環境"
+description: "如何本地建立並啟動完整 MCP 閘道開發環境"
+---
+
+本文件說明如何在本地建立並啟動完整 MCP 閘道開發環境，包括必要服務元件的啟動流程。
+
+## 前置需求
+
+請先確保系統已安裝以下軟體：
+
+<CardGroup cols={3}>
+  <Card title="Git" icon="git">
+    版本控管工具
+  </Card>
+  <Card title="Go 1.24.1+" icon="golang">
+    Go 語言環境
+  </Card>
+  <Card title="Node.js v20.18.0+" icon="nodejs">
+    JavaScript 執行環境（含 npm）
+  </Card>
+</CardGroup>
+
+## 專案架構總覽
+
+MCP 閘道專案包含以下核心組件：
+
+<AccordionGroup>
+  <Accordion icon="server" title="apiserver">
+    提供設定管理、用戶介面等 API 服務
+  </Accordion>
+  <Accordion icon="gateway" title="mcp-gateway">
+    核心閘道服務，負責 MCP 協定轉換
+  </Accordion>
+  <Accordion icon="flask" title="mock-server">
+    開發測試用的 mock user 服務
+  </Accordion>
+  <Accordion icon="browser" title="web">
+    管理介面前端
+  </Accordion>
+</AccordionGroup>

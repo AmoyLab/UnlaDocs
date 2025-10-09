@@ -1,0 +1,143 @@
+---
+title: "快速開始"
+description: "Unla（MCP 閘道）完整部署與設定指南"
+---
+
+## 一鍵啟動 MCP 閘道
+
+> 所有服務設定參數皆可透過環境變數注入改動
+
+請注意下列環境變數需設定（其他環境變數請依實際狀況調整）：
+
+```bash
+export APISERVER_JWT_SECRET_KEY="changeme-please-generate-a-random-secret"
+export SUPER_ADMIN_USERNAME="admin"
+export SUPER_ADMIN_PASSWORD="changeme-please-use-a-secure-password"
+```
+
+## GHCR 映像檔
+
+使用 GitHub Container Registry 映像檔：
+
+```bash
+docker run -d \
+  --name unla \
+  -p 8080:80 \
+  -p 5234:5234 \
+  -p 5235:5235 \
+  -p 5335:5335 \
+  -p 5236:5236 \
+  -e ENV=production \
+  -e TZ=Asia/Shanghai \
+  -e APISERVER_JWT_SECRET_KEY=${APISERVER_JWT_SECRET_KEY} \
+  -e SUPER_ADMIN_USERNAME=${SUPER_ADMIN_USERNAME} \
+  -e SUPER_ADMIN_PASSWORD=${SUPER_ADMIN_PASSWORD} \
+  --restart unless-stopped \
+  ghcr.io/amoylab/unla/allinone:latest
+```
+
+## 阿里雲映像檔
+
+在中國地區設備可透過阿里雲倉庫拉取：
+
+```bash
+export APISERVER_JWT_SECRET_KEY="changeme-please-generate-a-random-secret"
+export SUPER_ADMIN_USERNAME="admin"
+export SUPER_ADMIN_PASSWORD="changeme-please-use-a-secure-password"
+```
+
+使用阿里雲映像啟動：
+
+```bash
+docker run -d \
+  --name unla \
+  -p 8080:80 \
+  -p 5234:5234 \
+  -p 5235:5235 \
+  -p 5335:5335 \
+  -p 5236:5236 \
+  -e ENV=production \
+  -e TZ=Asia/Shanghai \
+  -e APISERVER_JWT_SECRET_KEY=${APISERVER_JWT_SECRET_KEY} \
+  -e SUPER_ADMIN_USERNAME=${SUPER_ADMIN_USERNAME} \
+  -e SUPER_ADMIN_PASSWORD=${SUPER_ADMIN_PASSWORD} \
+  --restart unless-stopped \
+  registry.ap-southeast-1.aliyuncs.com/amoylab/unla-allinone:latest
+```
+
+## 存取與設定
+
+<Steps>
+  <Step title="進入網頁介面">
+    請在瀏覽器打開 http://localhost:8080/，並以管理員帳號登入
+  </Step>
+  <Step title="新增 MCP 伺服器">
+    1. 複製設定檔：https://github.com/AmoyLab/Unla/blob/main/configs/proxy-mock-server.yaml
+    2. 在網頁介面點選「新增 MCP Server」
+    3. 貼上設定保存即可
+  </Step>
+</Steps>
+
+## 可用端點
+
+設定完成後，服務將提供以下端點：
+
+<CardGroup cols={1}>
+  <Card title="MCP 端點" icon="link">
+    - **MCP SSE**: `http://localhost:5235/gateway/user/sse`
+    - **MCP SSE 訊息**: `http://localhost:5235/gateway/user/message`
+    - **MCP Streamable HTTP**: `http://localhost:5235/gateway/user/mcp`
+  </Card>
+</CardGroup>
+
+在 MCP Client 設定 URL 時請加上 `/sse` 或 `/mcp` 後綴，即可開始使用服務。
+
+## 測試方式
+
+您可採用下列兩種測試方式：
+
+<CardGroup cols={2}>
+  <Card title="網頁介面測試" icon="globe">
+    在網頁的 MCP Chat 頁面測試服務
+  </Card>
+  <Card title="MCP 客戶端測試" icon="terminal">
+    使用您的 MCP 客戶端（**推薦**）
+  </Card>
+</CardGroup>
+
+## 進階設定（可選）
+
+若需更細緻的設定控制，可使用掛載設定檔方式啟動：
+
+<Steps>
+  <Step title="建立目錄並下載設定檔">
+    ```bash
+    mkdir -p unla/{configs,data}
+    cd unla/
+    curl -sL https://raw.githubusercontent.com/amoylab/unla/refs/heads/main/configs/apiserver.yaml -o configs/apiserver.yaml
+    curl -sL https://raw.githubusercontent.com/amoylab/unla/refs/heads/main/configs/mcp-gateway.yaml -o configs/mcp-gateway.yaml
+    curl -sL https://raw.githubusercontent.com/amoylab/unla/refs/heads/main/.env.example -o .env.allinone
+    ```
+  </Step>
+  <Step title="以設定檔方式啟動">
+    ```bash
+    docker run -d \
+               --name unla \
+               -p 8080:80 \
+               -p 5234:5234 \
+               -p 5235:5235 \
+               -p 5335:5335 \
+               -p 5236:5236 \
+               -e ENV=production \
+               -v $(pwd)/configs:/app/configs \
+               -v $(pwd)/data:/app/data \
+               -v $(pwd)/.env.allinone:/app/.env \
+               --restart unless-stopped \
+               ghcr.io/amoylab/unla/allinone:latest
+    ```
+  </Step>
+</Steps>
+
+<Tip>
+以掛載設定檔方式啟動，可精細控制各服務參數。詳細設定請參見 [設定說明文件](/zh-tw/configuration/apiserver)。
+</Tip>

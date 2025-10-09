@@ -1,0 +1,40 @@
+---
+title: '導覽'
+description: 'docs.json 的 navigation 欄位定義導覽選單中的頁面'
+icon: 'map'
+---
+
+導覽選單（navigation menu）為網站上的連結清單。
+
+每次新增頁面時，你通常都需要同步更新 `docs.json`。頁面不會自動顯示於導覽。
+
+## 導覽語法
+
+導覽語法為遞迴結構，可建立巢狀分組。不須包含 `.mdx` 副檔名於頁面設定。
+
+<CodeGroup>
+
+```json 一般導覽
+"navigation": {
+  "tabs": [
+    {
+      "tab": "說明文件",
+      "groups": [
+        {
+          "group": "快速開始",
+          "pages": ["quickstart"]
+        }
+      ]
+    }
+  ]
+}
+```
+
+```json 巢狀導覽
+"navigation": {
+  "tabs": [
+    {
+      "tab": "說明文件",
+      "groups": [
+        {
+          "group": "快速開始",

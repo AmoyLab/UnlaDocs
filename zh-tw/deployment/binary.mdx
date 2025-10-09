@@ -1,0 +1,42 @@
+---
+title: "二進位檔部署"
+description: "使用二進位檔部署 MCP 閘道"
+---
+
+## 支援平台
+
+目前支援以下平台的二進位部署：
+
+<CardGroup cols={2}>
+  <Card title="Linux AMD64" icon="linux">
+    適用於 x86_64 架構 Linux 系統
+  </Card>
+  <Card title="Linux ARM64" icon="linux">
+    適用於 ARM64 架構 Linux 系統
+  </Card>
+</CardGroup>
+
+最新版本二進位檔可於 [GitHub Releases](https://github.com/amoylab/unla/releases) 取得下載。
+
+## 部署步驟
+
+<Steps>
+  <Step title="建立目錄並下載設定檔">
+    ```bash
+    mkdir -p unla/{configs,data}
+    cd unla/
+    curl -sL https://raw.githubusercontent.com/amoylab/unla/refs/heads/main/configs/apiserver.yaml -o configs/apiserver.yaml
+    curl -sL https://raw.githubusercontent.com/amoylab/unla/refs/heads/main/configs/mcp-gateway.yaml -o configs/mcp-gateway.yaml
+    curl -sL https://raw.githubusercontent.com/amoylab/unla/refs/heads/main/.env.example -o .env
+    ```
+  </Step>
+
+  <Step title="調整 macOS PID 檔案路徑">
+    <Note>
+      macOS 下 `/var/run/mcp-gateway.pid` 可能無法寫入，因此須調整儲存路徑。
+    </Note>
+    ```bash
+    sed -i 's|/var/run/mcp-gateway.pid|./data/mcp-gateway.pid|g' .env
+    ```
+  </Step>
+</Steps>

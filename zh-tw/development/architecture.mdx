@@ -1,0 +1,40 @@
+---
+title: "系統架構"
+description: "MCP 閘道系統整體架構設計與模組說明"
+---
+
+MCP 閘道系統整體架構包含閘道本身、管理後端、支援性 API、儲存機制及與外部服務整合方式。
+
+## 架構圖
+
+<Warning>
+架構圖正在更新中，未來版本將提供詳細系統架構示意。
+</Warning>
+
+## 核心模組
+
+### MCP 閘道（mcp-gateway）
+
+MCP 閘道為系統核心組件，負責處理所有 MCP 協定請求：
+
+<CardGroup cols={2}>
+  <Card title="請求處理" icon="globe">
+    - **統一入口**：`/*` 監聽所有 HTTP 請求
+    - **路由分配**：根據路徑前綴動態分發請求
+  </Card>
+  <Card title="協定轉換" icon="arrows-spin">
+    - **協定解析**：解析 JSON-RPC 格式請求
+    - **工具分配**：解析工具名稱並建構呼叫參數
+  </Card>
+</CardGroup>
+
+#### 主要功能
+
+<Steps>
+  <Step title="請求路由">
+    依路徑前綴及後綴（`/sse`、`/message`、`/mcp`）分發請求
+  </Step>
+  <Step title="協定解析">
+    解析 JSON-RPC 格式，抽取方法及參數
+  </Step>
+  <Step title="服務呼叫">

@@ -1,0 +1,40 @@
+---
+title: "OAuth 登入設定"
+description: "Google 與 GitHub OAuth 登入功能設定詳細教學"
+---
+
+## 簡介
+
+Unla 支援用戶透過第三方 OAuth 服務登入，現階段支援 `Google` 及 `GitHub` 登入。用戶可直接用現有 Google 或 GitHub 帳號快速登入 Unla 網頁介面，無需重新註冊。
+
+<CardGroup cols={2}>
+  <Card title="Google 登入" icon="google">
+    使用 Google 帳號快速登入
+  </Card>
+  <Card title="GitHub 登入" icon="github">
+    使用 GitHub 帳號快速登入
+  </Card>
+</CardGroup>
+
+## 事前準備
+
+在設定 OAuth 登入前，需於對應第三方平台建立 OAuth 應用：
+
+<Steps>
+  <Step title="Google Cloud Console">
+    於 Google Cloud Console 建立 OAuth 2.0 用戶端 ID
+  </Step>
+  <Step title="GitHub 設定">
+    於 GitHub 建立 OAuth 應用
+  </Step>
+  <Step title="設定 Callback URLs">
+    為每個 OAuth 應用正確設定回調網址
+  </Step>
+</Steps>
+
+## Google OAuth 設定
+
+### 1. 建立 Google OAuth 應用
+
+<Steps>
+  <Step title="進入 Google Cloud Console">

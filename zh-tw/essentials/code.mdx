@@ -1,0 +1,36 @@
+---
+title: '程式碼區塊'
+description: '顯示行內程式碼與程式碼區塊'
+icon: 'code'
+---
+
+## 基本用法
+
+### 行內程式碼
+
+要將單字或片語標示為程式碼，可用反引號（`）包住。
+
+```
+要將單字或片語標示為程式碼，可用反引號（`）包住。
+```
+
+### 程式碼區塊
+
+使用[圍欄式程式碼區塊](https://www.markdownguide.org/extended-syntax/#fenced-code-blocks)時，請用三個反引號包住程式碼，並於開頭指定程式語言，可產生語法高亮效果。亦可在語言後寫程式檔名。
+
+```java HelloWorld.java
+class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
+    }
+}
+```
+
+````md
+```java HelloWorld.java
+class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
+    }
+}
+```

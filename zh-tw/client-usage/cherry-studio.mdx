@@ -1,0 +1,40 @@
+---
+title: "Cherry Studio 設定指南"
+description: "如何在 Cherry Studio 中設定 MCP 閘道"
+---
+
+Cherry Studio 是一款支援 MCP（Model Context Protocol）的 AI 客戶端工具。本文件介紹如何在 Cherry Studio 中設定 MCP 閘道。
+
+## 設定步驟
+
+<Steps>
+  <Step title="開啟 Cherry Studio">
+    啟動 Cherry Studio 應用程式
+  </Step>
+
+  <Step title="進入設定畫面">
+    於 Cherry Studio 內找到設定選項
+  </Step>
+
+  <Step title="設定 MCP 連線">
+    新增 MCP 閘道連線資訊：
+    - **伺服器 URL**：`http://localhost:5235/gateway/user/sse`
+    - **協定**：SSE（Server-Sent Events）
+  </Step>
+
+  <Step title="測試連線">
+    儲存設定並測試連線是否成功
+  </Step>
+</Steps>
+
+## 支援的端點
+
+Cherry Studio 支援以下 MCP 閘道端點：
+
+<CardGroup cols={1}>
+  <Card title="MCP 端點" icon="link">
+    - **SSE**：`http://localhost:5235/gateway/user/sse`
+    - **Streamable HTTP**：`http://localhost:5235/gateway/user/mcp`
+    - **訊息**：`http://localhost:5235/gateway/user/message`
+  </Card>
+</CardGroup>
