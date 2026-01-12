@@ -75,65 +75,65 @@
         ]
       },
       {
-        "language": "zh-tw",
+        "language": "zh-Hant",
         "groups": [
           {
             "group": "快速開始",
             "pages": [
-              "zh-tw/index",
-              "zh-tw/quickstart"
+              "zh-Hant/index",
+              "zh-Hant/quickstart"
             ]
           },
           {
             "group": "安裝部署",
             "pages": [
-              "zh-tw/deployment/docker",
-              "zh-tw/deployment/k8s",
-              "zh-tw/deployment/binary"
+              "zh-Hant/deployment/docker",
+              "zh-Hant/deployment/k8s",
+              "zh-Hant/deployment/binary"
             ]
           },
           {
             "group": "配置說明",
             "pages": [
-              "zh-tw/configuration/apiserver",
-              "zh-tw/configuration/mcp-gateway",
-              "zh-tw/configuration/gateways",
-              "zh-tw/configuration/templates"
+              "zh-Hant/configuration/apiserver",
+              "zh-Hant/configuration/mcp-gateway",
+              "zh-Hant/configuration/gateways",
+              "zh-Hant/configuration/templates"
             ]
           },
           {
             "group": "Web 配置",
             "pages": [
-              "zh-tw/configuration/oauth-login"
+              "zh-Hant/configuration/oauth-login"
             ]
           },
           {
             "group": "客戶端使用",
             "pages": [
-              "zh-tw/client-usage/cursor",
-              "zh-tw/client-usage/cherry-studio"
+              "zh-Hant/client-usage/cursor",
+              "zh-Hant/client-usage/cherry-studio"
             ]
           },
           {
             "group": "開發文檔",
             "pages": [
-              "zh-tw/development/architecture",
-              "zh-tw/development/local-development"
+              "zh-Hant/development/architecture",
+              "zh-Hant/development/local-development"
             ]
           },
           {
             "group": "API 文檔",
             "pages": [
-              "zh-tw/api-reference/introduction"
+              "zh-Hant/api-reference/introduction"
             ]
           },
           {
             "group": "端點示例",
             "pages": [
-              "zh-tw/api-reference/endpoint/get",
-              "zh-tw/api-reference/endpoint/create",
-              "zh-tw/api-reference/endpoint/delete",
-              "zh-tw/api-reference/endpoint/webhook"
+              "zh-Hant/api-reference/endpoint/get",
+              "zh-Hant/api-reference/endpoint/create",
+              "zh-Hant/api-reference/endpoint/delete",
+              "zh-Hant/api-reference/endpoint/webhook"
             ]
           }
         ]
